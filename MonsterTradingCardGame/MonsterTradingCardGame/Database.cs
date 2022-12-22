@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Collections.ObjectModel;
+using System.Text;
 using Npgsql;
 using NpgsqlTypes;
 
@@ -10,7 +11,7 @@ namespace MonsterTradingCardGame {
             string host = "localhost";
             string username = "postgres";
             string pw = "asdf";
-            string db = "monster_trading_card_game";
+            string db = "mtcg";
             con = new NpgsqlConnection($"Host={host};Username={username};Password={pw};Database={db}");
         }
 
@@ -54,17 +55,17 @@ namespace MonsterTradingCardGame {
             return cmd.ExecuteScalar() != null;
         }
 
-        public bool addUser(string name, string password, int coins) {
+        public bool addUser(User user) {
             string sql = @"
                 insert into player
-                    (id     ,  name,        password                ,  coins)
+                    (id     ,  name,        password                ,  coins , wins, defeats, ties)
                 values
-                    (default, @name, crypt(@password, gen_salt('bf')), @coins)
+                    (default, @name, crypt(@password, gen_salt('bf')), @coins,  0  ,   0    , 0   )
                 ;";
             using NpgsqlCommand cmd = new(sql, con);
-            cmd.Parameters.AddWithValue("@name", name);
-            cmd.Parameters.AddWithValue("@password", password);
-            cmd.Parameters.AddWithValue("@coins", coins);
+            cmd.Parameters.AddWithValue("@name", user.username);
+            cmd.Parameters.AddWithValue("@password", user.password);
+            cmd.Parameters.AddWithValue("@coins", user.coins);
             try {
                 return cmd.ExecuteNonQuery() > 0;
             } catch (Exception e) {
@@ -90,23 +91,23 @@ namespace MonsterTradingCardGame {
                 .Insert(0, str, count).ToString();
         }
 
-        private Collection? getCollectionFromReader(NpgsqlDataReader reader) {
+        private List<Card>? getCardListFromReader(NpgsqlDataReader reader) {
             if (reader == null) {
                 return null;
             }
-            Collection collection = new();
+            List<Card> cardList = new();
             while (reader.Read()) {
-                collection.addCard(new Card(
+                cardList.Add(new Card(
                     reader.GetInt32(0),
                     reader.GetString(1),
                     (Element)reader.GetInt32(2),
                     reader.GetInt32(3),
                     (Type)reader.GetInt32(4)));
             }
-            return collection;
+            return cardList;
         }
 
-        public Collection? buyPackage(Guid userId, int cost) {
+        public List<Card>? buyPackage(Guid userId, int cost) {
             using NpgsqlCommand cmd = new NpgsqlCommand();
             cmd.Connection = con;
 
@@ -121,16 +122,16 @@ namespace MonsterTradingCardGame {
                 order by random()
                 limit {packageSize};";
 
-            Collection? collection;
+            List<Card>? package;
             try {
                 using NpgsqlDataReader reader = cmd.ExecuteReader();
-                collection = getCollectionFromReader(reader);
+                package = getCardListFromReader(reader);
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
                 return null;
             }
             
-            if (collection == null) {
+            if (package == null) {
                 throw new Exception("found no cards for Package");
             }
 
@@ -157,9 +158,7 @@ namespace MonsterTradingCardGame {
                 cmd.Parameters.AddWithValue("@id", userId);
                 cmd.Parameters.Add("@card", NpgsqlDbType.Integer);
 
-                foreach (Card card in collection) {
-                    //Console.WriteLine(card.id);
-
+                foreach (Card card in package) {
                     cmd.Parameters["@card"].Value = card.id;
                     cmd.ExecuteNonQuery();
                 }
@@ -178,10 +177,10 @@ namespace MonsterTradingCardGame {
                 return null;
             }
 
-            return collection;
+            return package;
         }
 
-        public Collection? getStack(Guid userId) {
+        public List<Card>? getStack(Guid userId) {
             string sql = @"
                 select c.id, c.name, c.element, c.damage, c.type
                   from stack s
@@ -192,14 +191,14 @@ namespace MonsterTradingCardGame {
                 using NpgsqlCommand cmd = new (sql, con);
                 cmd.Parameters.AddWithValue("id", userId);
                 using NpgsqlDataReader reader = cmd.ExecuteReader();
-                return getCollectionFromReader(reader);
+                return getCardListFromReader(reader);
             } catch (Exception ex) {
                 Console.WriteLine(ex);
                 return null;
             }
         }
 
-        public Collection? getDeck(Guid userId) {
+        public List<Card>? getDeck(Guid userId) {
             string sql = @"
                 select c.id, c.name, c.element, c.damage, c.type
                   from deck d
@@ -210,7 +209,7 @@ namespace MonsterTradingCardGame {
                 using NpgsqlCommand cmd = new (sql, con);
                 cmd.Parameters.AddWithValue("id", userId);
                 using NpgsqlDataReader reader = cmd.ExecuteReader();
-                return getCollectionFromReader(reader);
+                return getCardListFromReader(reader);
             } catch (Exception ex) {
                 Console.WriteLine(ex);
                 return null;

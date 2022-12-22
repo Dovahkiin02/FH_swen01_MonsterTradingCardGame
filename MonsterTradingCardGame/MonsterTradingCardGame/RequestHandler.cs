@@ -28,7 +28,7 @@ namespace MonsterTradingCardGame {
             }
         }
 
-        public static JObject buildError(HttpStatusCode status, string msg) {
+        private static JObject buildError(HttpStatusCode status, string msg) {
             var error = new JObject();
             error["status"] = (int)status;
             error["message"] = msg;
@@ -41,8 +41,8 @@ namespace MonsterTradingCardGame {
 
         public static void writeResponse(TcpClient client, HttpStatusCode status, object data) {
             // Serialize the data object to a JSON string
-            var json = JsonConvert.SerializeObject(data);
-            var jsonBytes = Encoding.UTF8.GetBytes(json);
+            var body = JsonConvert.SerializeObject(data);
+            var jsonBytes = Encoding.UTF8.GetBytes(body);
 
             // Get the reason phrase for the status code
             var reasonPhrase = getReasonPhrase((int)status);
@@ -52,13 +52,13 @@ namespace MonsterTradingCardGame {
                               $"Content-Type: application/json\n" +
                               $"Content-Length: {jsonBytes.Length}\n" +
                               "\n" +
-                              json;
+                              body;
             var responseBytes = Encoding.UTF8.GetBytes(responseText);
 
             // Send the response back to the client
             var stream = client.GetStream();
             stream.Write(responseBytes, 0, responseBytes.Length);
-            client.Close();
+            //client.Close();
         }
 
         protected bool checkKeys(JObject body, string[] keys) {
