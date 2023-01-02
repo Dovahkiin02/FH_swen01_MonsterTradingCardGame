@@ -16,8 +16,12 @@ namespace MonsterTradingCardGame {
     
         private static readonly Dictionary<int, string> reasonPhrases = new Dictionary<int, string> {
             [200] = "OK",
+            [201] = "Created", 
             [400] = "Bad Request",
+            [401] = "Unauthorized",
+            [403] = "Forbidden",
             [404] = "Not Found",
+            [500] = "Internal Server Error"
         };
 
         private static string getReasonPhrase(int status) {
@@ -39,9 +43,27 @@ namespace MonsterTradingCardGame {
             writeResponse(client, status, buildError(status, msg));
         }
 
-        public static void writeResponse(TcpClient client, HttpStatusCode status, object data) {
+        public static void writeUnauthorizedErr(TcpClient client) {
+            string msg = "unauthorized access";
+            HttpStatusCode status = HttpStatusCode.Unauthorized;
+            writeResponse(client, status, buildError(status, msg));
+        }
+
+        public static void writeForbiddenErr(TcpClient client) {
+            string msg = "unauthorized access";
+            HttpStatusCode status = HttpStatusCode.Forbidden;
+            writeResponse(client, status, buildError(status, msg));
+        }
+
+        public static void writeMalformedBodyErr(TcpClient client) {
+            string msg = "malformed body";
+            HttpStatusCode status = HttpStatusCode.BadRequest;
+            writeResponse(client, status, buildError(status, msg));
+        }
+
+        public static void writeResponse(TcpClient client, HttpStatusCode status, object? data) {
             // Serialize the data object to a JSON string
-            var body = JsonConvert.SerializeObject(data);
+            var body = JsonConvert.SerializeObject(data ?? "");
             var jsonBytes = Encoding.UTF8.GetBytes(body);
 
             // Get the reason phrase for the status code
@@ -58,7 +80,29 @@ namespace MonsterTradingCardGame {
             // Send the response back to the client
             var stream = client.GetStream();
             stream.Write(responseBytes, 0, responseBytes.Length);
-            //client.Close();
+            client.Close();
+        }
+
+        public static void writeSse(StreamWriter writer, object? data) {
+            //var body = JsonConvert.SerializeObject(data ?? "");
+            //var jsonBytes = Encoding.UTF8.GetBytes(body);
+            
+            writer.WriteLine("HTTP/1.1 200 OK");
+            writer.WriteLine("Content-Type: text/plain");
+            writer.WriteLine();
+            writer.WriteLine("data: Hello, world!\n");
+            writer.Flush();
+            Thread.Sleep(3000);
+            writer.WriteLine("test: asdf");
+            writer.Flush();
+            
+            //writer.Close();
+            //var responseText = $"HTTP/1.1 200 OK\n" +
+            //                  $"Content-Type: text/event-stream\n" +
+            //                  $"Content-Length: {jsonBytes.Length}\n" +
+            //                  "\n" +
+            //                  body;
+            //var responseBytes = Encoding.UTF8.GetBytes(responseText);
         }
 
         protected bool checkKeys(JObject body, string[] keys) {
@@ -69,16 +113,6 @@ namespace MonsterTradingCardGame {
                 if (!body.ContainsKey(key)) {
                     return false;
                 } 
-            }
-
-            return true;
-        }
-
-        protected bool checkBody(TcpClient client, JObject body, string[] keys) {
-            if (!checkKeys(body, keys)) {
-                string errMsg = "malformed request body";
-                writeErr(client, System.Net.HttpStatusCode.BadRequest, errMsg);
-                return false;
             }
 
             return true;

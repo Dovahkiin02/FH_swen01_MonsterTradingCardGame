@@ -1,10 +1,10 @@
 insert into card
     (id, name, element, damage, type)
 values
-    (default, 'WaterGoblin', 1, 10, 1)
-,   (default, 'FireGoblin', 4, 3, 1)
-,   (default, 'EarthGoblin', 2, 6, 1)
-,   (default, 'FireWorm', 4, 11, 1)
-,   (default, 'FireDragon', 4, 8, 1)
-,   (default, 'WindSpell', 3, 10, 2)
+    (default, 'WaterGoblin', 2, 10, 2)
+,   (default, 'FireGoblin', 1, 3, 2)
+,   (default, 'EarthGoblin', 4, 6, 2)
+,   (default, 'FireKraken', 1, 11, 6)
+,   (default, 'FireDragon', 1, 8, 3)
+,   (default, 'WindSpell', 3, 10, 1)
 ;

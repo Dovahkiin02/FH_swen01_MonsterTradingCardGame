@@ -1,21 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.PortableExecutable;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace MonsterTradingCardGame {
     public enum Element {
-        FIRE  = 1,
-        WATER = 2,
-        WIND  = 3,
-        EARTH = 4,
+        NORMAL = 1,
+        FIRE = 2,
+        WATER = 3,
+        GRASS = 4,
     }
     public enum Type {
-        MONSTER = 1,
-        SPELL   = 2,
+        SPELL = 1,
+        GOBLIN,
+        ORK,
+        DRAGON,
+        WIZZARD,
+        KNIGHT,
+        KRAKEN,
+        ELF,
     }
+    [JsonObject]
     public record Card (int id, string name, Element element, int damage, Type type) {
         public override string ToString() {
             return $@"
@@ -26,5 +29,17 @@ namespace MonsterTradingCardGame {
                 type: {type.ToString()}
             ";
         }
+
+        
+
+        public static Card buildCard(JToken jToken) => new(
+            jToken.Value<int>("id"),
+            jToken.Value<string>("name"),
+            jToken.Value<Element>("element"),
+            jToken.Value<int>("damage"),
+            jToken.Value<Type>("type")
+            );
+
+        
     }
 }

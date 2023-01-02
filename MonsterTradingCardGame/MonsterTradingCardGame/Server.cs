@@ -6,19 +6,23 @@ using Newtonsoft.Json;
 
 namespace MonsterTradingCardGame {
     internal class Server {
-        private readonly Dictionary<string, Dictionary<string, Action<TcpClient, JObject>>> routes;
+        private readonly Dictionary<string, Dictionary<string, Action<TcpClient, JObject, User>>> routes = new();
         private readonly int port;
         private readonly Database db;
         private readonly GetRequestHandlers getRequestHandlers;
         private readonly PostRequestHandler postRequestHandlers;
 
         private void addRoutes() {
-            routes.Add("GET", new Dictionary<string, Action<TcpClient, JObject>> {
+            routes.Add("GET", new Dictionary<string, Action<TcpClient, JObject, User>> {
                 ["/stack"] = getRequestHandlers.getStack,
                 ["/deck"] = getRequestHandlers.getDeck
             });
-            routes.Add("POST", new Dictionary<string, Action<TcpClient, JObject>> {
-                ["/login"] = postRequestHandlers.login
+            routes.Add("POST", new Dictionary<string, Action<TcpClient, JObject, User>> {
+                ["/login"] = postRequestHandlers.login,
+                ["/user"] = postRequestHandlers.addUser,
+                ["/card"] = postRequestHandlers.addCard,
+                ["/deck"] = postRequestHandlers.updateDeck,
+                ["/transactions/package"] = postRequestHandlers.buyPackage
             });
         }
 
@@ -26,8 +30,7 @@ namespace MonsterTradingCardGame {
             this.port = port;
             this.db = db;
             getRequestHandlers = new(db);
-            postRequestHandlers = new(db);
-            routes = new();
+            postRequestHandlers = new(db, new GameHandler(db));
             addRoutes();
         }
 
@@ -47,45 +50,60 @@ namespace MonsterTradingCardGame {
         }
 
         private void ProcessRequest(TcpClient client) {
+            //RequestHandler.writeUnauthorizedErr(client);
             byte[] requestData = new byte[4096];
             int bytesRead = client.GetStream().Read(requestData, 0, requestData.Length);
             string requestString = Encoding.UTF8.GetString(requestData, 0, bytesRead);
+            string errMsg;
 
             Console.WriteLine(requestString);
+            RequestHandler.writeSse(new StreamWriter(client.GetStream()), null);
+            Thread.Sleep(10000);
+            client.Close();
+            /*
             HttpRequest request;
             try {
                 request = parseRequest(requestString);
             } catch (Exception e) {
-                string errMsg = "malformed request";
+                errMsg = "malformed request";
                 RequestHandler.writeErr(client, HttpStatusCode.BadRequest, errMsg);
 
                 return;
             }
-
-            if (request.headers.TryGetValue("Authorization", out string token)) {
-
+            User? currentUser = null;
+            if (request.headers.TryGetValue("Authorization", out string? token)) {
+                Guid? userId = JwtHandler.validateJwt(token);
+                if (userId == null) {
+                    RequestHandler.writeUnauthorizedErr(client);
+                    return;
+                }
+                currentUser = db.getUser(userId.Value);
+                if (currentUser == null) {
+                    RequestHandler.writeUnauthorizedErr(client);
+                    return;
+                }
+                //currentUser = new User(Guid.NewGuid(), "asdf", Role.ADMIN, 20);
             } else if (request.method != "POST" || request.resource != "/login") {
-                string errMsg = "unauthorized access";
-                RequestHandler.writeErr(client, HttpStatusCode.Unauthorized, errMsg);
+                RequestHandler.writeUnauthorizedErr(client);
                 return;
             }
 
             if (routes.TryGetValue(request.method, out var methodSpecificRoutes)) {
                 if (methodSpecificRoutes.TryGetValue(request.resource, out var handler)) {
-                    handler(client, request.body);
+                    handler(client, request.body, currentUser);
                 } else {
-                    string errMsg = "resource not found";
+                    errMsg = "resource not found";
                     RequestHandler.writeErr(client, HttpStatusCode.NotFound, errMsg);
                     return;
                 }
             } else {
-                string errMsg = "resource not found";
+                errMsg = "resource not found";
                 RequestHandler.writeErr(client, HttpStatusCode.NotFound, errMsg);
                 return;
-            }
+            }*/
         }
 
-        private HttpRequest parseRequest(string request) {
+        public HttpRequest parseRequest(string request) {
             HttpRequest httpRequest = new();
             // Parse the request to determine the HTTP method and requested resource
             var requestLines = request.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
@@ -93,7 +111,8 @@ namespace MonsterTradingCardGame {
             // Parse the request line
             string[] requestLine = requestLines[0].Split(' ');
             httpRequest.method = requestLine[0];
-            httpRequest.resource = requestLine[1];
+            string[] parameters = requestLine[1].Split('?');
+            httpRequest.resource = parameters[0];
             httpRequest.httpVersion = requestLine[2];
 
             var headers = new Dictionary<string, string>();
@@ -107,21 +126,39 @@ namespace MonsterTradingCardGame {
 
                 string[] headerParts = line.Split(':');
                 if (headerParts.Length == 2) {
-                    headers[headerParts[0]] = headerParts[1];
+                    headers[headerParts[0]] = headerParts[1].Trim();
                 }
             }
 
             httpRequest.headers = headers;
 
             string body = string.Join("", requestLines.Skip(i).Take(requestLines.Length - i));
-
+            JObject jbody = JsonConvert.DeserializeObject<dynamic>(body) ?? new JObject();
+            if (parameters.Length > 1) {
+                if (parameters.Length > 2) {
+                    throw new Exception("malformed parameters");
+                }
+                jbody["parameter"] = parseParameters(parameters[1]);
+            }
             try {
-                httpRequest.body = JsonConvert.DeserializeObject<dynamic>(body) ?? new JObject();
+                httpRequest.body = jbody; 
             } catch (Exception e) {
                 throw;
             }
             
             return httpRequest;
+        }
+
+        private JObject parseParameters(string parameter) {
+            string[] queryParamsArray = parameter.Split('&');
+
+            JObject queryParams = new ();
+            foreach (string param in queryParamsArray) {
+                string[] keyValue = param.Split('=');
+                queryParams.Add(keyValue[0], keyValue[1]);
+            }
+
+            return queryParams;
         }
     }
 

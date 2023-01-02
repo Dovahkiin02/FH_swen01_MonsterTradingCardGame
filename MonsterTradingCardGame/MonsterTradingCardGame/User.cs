@@ -9,5 +9,12 @@ namespace MonsterTradingCardGame {
         ADMIN,
         PLAYER
     }
-    internal record User (string username, string password, int coins, Role role, int wins = 0, int defeats = 0, int ties = 0);
+    internal record User (
+        Guid id,
+        string username,
+        Role role,
+        int coins,
+        int wins = 0,
+        int defeats = 0,
+        int ties = 0);
 }

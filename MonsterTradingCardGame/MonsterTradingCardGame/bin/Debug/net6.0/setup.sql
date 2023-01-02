@@ -42,7 +42,13 @@ create table if not exists stack (
 );
 
 create table if not exists deck (
-	id serial primary key
+	id int generated always as identity
 ,	player uuid not null references player(id)
 ,   card   int  not null references card(id)
 );
+
+insert into player
+	(id, name, password, coins, role, wins, defeats, ties)
+values
+	(default, 'admin', crypt('asdf', gen_salt('bf')), 20, 0, 0, 0, 0)
+;
