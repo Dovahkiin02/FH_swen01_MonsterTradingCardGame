@@ -12,12 +12,6 @@ namespace MonsterTradingCardGame {
         GAME_FINISHED
     }
 
-    enum FightResult {
-        PLAYER1,
-        PLAYER2,
-        TIE
-    }
-
     internal class GameHandler {
         private Database db;
         private ConcurrentDictionary<Guid, Status> ledger = new();
@@ -71,11 +65,19 @@ namespace MonsterTradingCardGame {
             ledger.AddOrUpdate(user1, Status.IN_GAME, (key, value) => Status.IN_GAME);
             ledger.AddOrUpdate(user2, Status.IN_GAME, (key, value) => Status.IN_GAME);
 
-            fight(
-                db.getDeck(user1)?.Select(t => t.Item2).ToList(), 
-                db.getDeck(user2)?.Select(t => t.Item2).ToList(),
-                out StringBuilder protocol
-                );
+            StringBuilder protocol = new StringBuilder();
+            Random rand = new Random();
+            int cardIndex1, cardIndex2;
+            List<Card> deck1 = db.getDeck(user1)?.Select(t => t.Item2).ToList();
+            List<Card> deck2 = db.getDeck(user2)?.Select(t => t.Item2).ToList();
+            for (int i = 0; deck1.Count > 0 && deck2.Count > 0 && i < maxFightRounds; i++) {
+                cardIndex1 = rand.Next(deck1.Count);
+                cardIndex2 = rand.Next(deck2.Count);
+                FightRecord record = fight(deck1[cardIndex1], deck2[cardIndex2]);
+                if (record.fightResult == FightResult.PLAYER1) {
+
+                }
+            }
 
             ledger.AddOrUpdate(user1, Status.GAME_FINISHED, (key, value) => Status.GAME_FINISHED);
             ledger.AddOrUpdate(user2, Status.GAME_FINISHED, (key, value) => Status.GAME_FINISHED);
@@ -83,13 +85,11 @@ namespace MonsterTradingCardGame {
             protocols.AddOrUpdate(user2, protocol.ToString(), (key, value) => protocol.ToString());
         }
 
-        private FightResult fight(List<Card> deck1, List<Card> deck2, out StringBuilder protocol) {
-            protocol = new StringBuilder();
-            Random rand = new Random();
-            for (int i = 0; deck1.Count > 0 && deck2.Count > 0 && i < maxFightRounds; i++) {
-                deck1[rand.Next(deck1.Count)]
-            }
+        private FightRecord fight(Card card1, Card card2) {
+            
         }
+
+         
 
         private void setElementInteractions() {
             elementInteractions.Add(Element.NORMAL, Tuple.Create(1f, 1f, 1f, 1f));
@@ -103,6 +103,26 @@ namespace MonsterTradingCardGame {
             typeInteractions.Add(Type.ORK, new Dictionary<Type, float> { { Type.WIZZARD, 0f } });
             typeInteractions.Add(Type.SPELL, new Dictionary<Type, float> { { Type.KRAKEN, 0f } });
             typeInteractions.Add(Type.DRAGON, new Dictionary<Type, float> { { Type.ELF, 0f } });
+        }
+
+        private enum FightResult {
+            PLAYER1,
+            PLAYER2,
+            TIE
+        }
+
+        private record FightRecord(string cardName1, float cardDamage1, string cardName2, float cardDamage2, FightResult fightResult, string player1 = "Player1", string player2 = "Player2") {
+            public override string ToString() {
+                string resultPhrase;
+                if (fightResult == FightResult.PLAYER1) {
+                    resultPhrase = cardName1 + " wins";
+                } else if (fightResult == FightResult.PLAYER2) {
+                    resultPhrase = cardName2 + " wins";
+                } else {
+                    resultPhrase = "tie";
+                }
+                return $"{player1}: {cardName1} ({cardDamage1} Damage) vs {player2}: {cardName2} ({cardDamage2} Damage) => {resultPhrase}";
+            }
         }
     }
 }
