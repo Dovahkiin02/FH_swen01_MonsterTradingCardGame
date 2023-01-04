@@ -1,13 +1,6 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Npgsql.Replication;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MonsterTradingCardGame {
     internal class PostRequestHandler : RequestHandler {
@@ -158,18 +151,43 @@ namespace MonsterTradingCardGame {
                 writeErr(client, HttpStatusCode.BadRequest, msg);
                 return;
             }
+            JObject response = new();
+            Status? status = gameHandler.getStatus(user.id);
+            if (status == null) {
+                status = gameHandler.joinGame(user.id);
+            }
 
-            Status status = gameHandler.joinGame(user.id);
             if (status == Status.WAITING) {
-                writeResponse(client, HttpStatusCode.Accepted, null);
+                response["status"] = Enum.GetName(typeof(Status), status);
+                writeResponse(client, HttpStatusCode.Accepted, response);
                 return;
-            } else { // Status is either IN_GAME or GAME_FINISHED
+            } else if (status == Status.FAILED) {
+                string msg = "unexpected error while finishing game";
+                writeResponse(client, HttpStatusCode.InternalServerError, msg);
+                return;
+            } else { 
                 Thread.Sleep(400);
-                if (gameHandler.getStatus(user.id) == Status.GAME_FINISHED) {
-                    
+                status = gameHandler.getStatus(user.id);
+                if (status == Status.FINISHED) {
+                    string? protocol = gameHandler.getProtocol(user.id);
+                    if (protocol == null) {
+                        string msg = "unexpected error while finishing game";
+                        writeErr(client, HttpStatusCode.InternalServerError, msg);
+                        return;
+                    }
+                    response["status"] = Enum.GetName(typeof(Status), status);
+                    response["protocol"] = protocol;
+                    writeResponse(client, HttpStatusCode.OK, response);
+                    return;
+                } else if (status == Status.FAILED) {
+                    string msg = "game failed";
+                    writeErr(client, HttpStatusCode.InternalServerError, msg);
+                    return;
+                } else {
+                    response["status"] = Enum.GetName(typeof(Status), status);
+                    writeResponse(client, HttpStatusCode.Accepted, response);
+                    return;
                 }
-                writeResponse(client, HttpStatusCode.Accepted, null);
-                return;
             }
         }
     }

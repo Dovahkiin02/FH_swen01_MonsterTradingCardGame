@@ -22,6 +22,7 @@ namespace MonsterTradingCardGame {
                 ["/user"] = postRequestHandlers.addUser,
                 ["/card"] = postRequestHandlers.addCard,
                 ["/deck"] = postRequestHandlers.updateDeck,
+                ["/game"] = postRequestHandlers.startGame,
                 ["/transactions/package"] = postRequestHandlers.buyPackage
             });
         }
@@ -56,11 +57,7 @@ namespace MonsterTradingCardGame {
             string requestString = Encoding.UTF8.GetString(requestData, 0, bytesRead);
             string errMsg;
 
-            Console.WriteLine(requestString);
-            RequestHandler.writeSse(new StreamWriter(client.GetStream()), null);
-            Thread.Sleep(10000);
-            client.Close();
-            /*
+            
             HttpRequest request;
             try {
                 request = parseRequest(requestString);
@@ -100,7 +97,7 @@ namespace MonsterTradingCardGame {
                 errMsg = "resource not found";
                 RequestHandler.writeErr(client, HttpStatusCode.NotFound, errMsg);
                 return;
-            }*/
+            }
         }
 
         public HttpRequest parseRequest(string request) {

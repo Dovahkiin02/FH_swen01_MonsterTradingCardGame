@@ -53,11 +53,26 @@ namespace MonsterTradingCardGame {
             using NpgsqlCommand cmd = new NpgsqlCommand(sql, con);
             cmd.Parameters.AddWithValue("@username", username);
             cmd.Parameters.AddWithValue("@password", password);
-            var result = cmd.ExecuteScalar();
+            object? result = cmd.ExecuteScalar();
             if (result == null) {
                 return null;
             }
             return Guid.Parse(result.ToString());
+        }
+
+        public string? getUsername(Guid userId) {
+            string sql = @"
+                select name
+                  from player
+                 where id = @id
+                ;";
+            using NpgsqlCommand cmd = new(sql, con);
+            cmd.Parameters.AddWithValue("@id", userId);
+            object? result = cmd.ExecuteScalar();
+            if (result == null) {
+                return null;
+            }
+            return result.ToString();
         }
 
         public bool addUser(string username, string password, int coins, Role role) {
@@ -308,24 +323,6 @@ namespace MonsterTradingCardGame {
             return false;
         }
 
-        public bool isDeckDefined(Guid userId) {
-            string sql = @"
-                select id
-                  from deck
-                 where player = @id
-                 limit 1
-                ;";
-            try {
-                using NpgsqlCommand cmd = new(sql, con);
-                cmd.Parameters.AddWithValue("id", userId);
-                using NpgsqlDataReader reader = cmd.ExecuteReader();
-                return reader.HasRows;
-            } catch (Exception ex) {
-                Console.WriteLine(ex);
-                return false;
-            }
-        }
-
         public bool addCardsToDeck(Guid userId, List<int> cards) {
             using NpgsqlCommand cmd = new();
             cmd.Connection = con;
@@ -340,12 +337,14 @@ namespace MonsterTradingCardGame {
             string insertSql = @"
                 insert into deck
                     (player, card)
-                select @id player, card
-                  from unnest(@cards) card
+                select @id player, s.card
+                  from stack s
+                  join unnest(@cards) c on s.id = c
+                 where s.player = @id
                 ;";
             try {
                 cmd.CommandText = deleteSql;
-                cmd.Parameters.AddWithValue("@id", userId);
+                cmd.Parameters.AddWithValue("id", userId);
                 int result = cmd.ExecuteNonQuery();
                 if (result < 0) {
                     Console.WriteLine("delete cards from deck failed");
@@ -354,8 +353,8 @@ namespace MonsterTradingCardGame {
                 }
 
                 cmd.CommandText = insertSql;
-                cmd.Parameters.AddWithValue("@id", userId);
-                cmd.Parameters.AddWithValue("@cards", cards);
+                cmd.Parameters.AddWithValue("id", userId);
+                cmd.Parameters.AddWithValue("cards", cards);
                 result = cmd.ExecuteNonQuery();
                 if (result <= 0) {
                     Console.WriteLine("insert cards into deck failed");
