@@ -17,7 +17,7 @@ namespace MonsterTradingCardGame {
             List<Tuple<int, Card>>? stack = db.getStack(user.id);
             if (stack == null) {
                 string msg = "unexpected error while trying to fetch stack";
-                writeErr(client, System.Net.HttpStatusCode.InternalServerError, msg);
+                writeStructuredResponse(client, System.Net.HttpStatusCode.InternalServerError, msg);
                 return;
             }
 
@@ -28,7 +28,7 @@ namespace MonsterTradingCardGame {
             List<Tuple<int, Card>>? deck = db.getDeck(user.id);
             if (deck == null) {
                 string msg = "unexpected error while trying to fetch stack";
-                writeErr(client, System.Net.HttpStatusCode.InternalServerError, msg);
+                writeStructuredResponse(client, System.Net.HttpStatusCode.InternalServerError, msg);
                 return;
             }
 

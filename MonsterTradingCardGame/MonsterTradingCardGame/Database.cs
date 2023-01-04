@@ -3,6 +3,7 @@ using System.Reflection.PortableExecutable;
 using System.Text;
 using Npgsql;
 using NpgsqlTypes;
+using static MonsterTradingCardGame.GameHandler;
 
 namespace MonsterTradingCardGame {
     internal class Database {
@@ -75,10 +76,11 @@ namespace MonsterTradingCardGame {
             return result.ToString();
         }
 
-        public bool addUser(string username, string password, int coins, Role role) {
+        public bool addUser(string username, string password, int coins, Role role, out string errMsg) {
+            errMsg = "";
             string sql = @"
                 insert into player
-                    (id     ,  name,        password                ,  coins ,  role, wins, defeats, ties)
+                    (id     ,  name,        password                ,  coins ,  role, wins, defeats, draws)
                 values
                     (default, @name, crypt(@password, gen_salt('bf')), @coins, @role,  0  ,   0    , 0   )
                 ;";
@@ -90,6 +92,10 @@ namespace MonsterTradingCardGame {
 
             try {
                 return cmd.ExecuteNonQuery() > 0;
+            } catch (PostgresException e) {
+                errMsg = "user already exists";
+                Console.WriteLine(e.Message);
+                return false;
             } catch (Exception e) {
                 Console.WriteLine(e.Message);
                 return false;
@@ -98,7 +104,7 @@ namespace MonsterTradingCardGame {
 
         public User? getUser(Guid userId) {
             string sql = @"
-                select id, name, role, coins, wins, defeats, ties
+                select id, name, role, coins, wins, defeats, draws
                   from Player 
                  where id = @userId
             ;";
@@ -115,7 +121,7 @@ namespace MonsterTradingCardGame {
                 coins: reader.GetInt32(3), 
                 wins: reader.GetInt32(4), 
                 defeats: reader.GetInt32(5), 
-                ties: reader.GetInt32(6)
+                draws: reader.GetInt32(6)
                 );
         }
 
@@ -368,6 +374,58 @@ namespace MonsterTradingCardGame {
                 transaction.Rollback();
                 return false;
             }
+        }
+
+        public bool updateStats(Guid user1, Guid user2, FightResult fightResult) {
+            string sql = @"
+                update player
+                   set {0} = {0} + 1
+                 where id = @id
+                ;";
+            string sqlUser1, sqlUser2;
+
+            switch (fightResult) {
+                case FightResult.PLAYER1:
+                    sqlUser1 = string.Format(sql, "wins");
+                    sqlUser2 = string.Format(sql, "defeats");
+                    break;
+                case FightResult.PLAYER2:
+                    sqlUser1 = string.Format(sql, "defeats");
+                    sqlUser2 = string.Format(sql, "wins");
+                    break;
+                default:
+                    sqlUser1 = string.Format(sql, "draws");
+                    sqlUser2 = string.Format(sql, "draws");
+                    break;
+            }
+
+            using NpgsqlCommand cmdUser1 = new(sqlUser1, con);
+            cmdUser1.Parameters.AddWithValue("id", user1);
+            
+            using NpgsqlTransaction transaction = con.BeginTransaction();
+            cmdUser1.Transaction = transaction;
+            try {
+                int result = cmdUser1.ExecuteNonQuery();
+                if (result <= 0) {
+                    transaction.Rollback();
+                    return false;
+                }
+                using NpgsqlCommand cmdUser2 = new(sqlUser2, con);
+                cmdUser2.Parameters.AddWithValue("id", user2);
+
+                result = cmdUser2.ExecuteNonQuery();
+                if (result <= 0) {
+                    transaction.Rollback();
+                    return false;
+                }
+                transaction.Commit();
+                return true;
+            } catch (Exception e) {
+                Console.WriteLine(e.Message);
+                transaction.Rollback();
+                return false;
+            }
+            
         }
 
         //public bool addOfferToStore(Guid userId, )

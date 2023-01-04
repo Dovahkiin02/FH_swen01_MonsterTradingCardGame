@@ -5,8 +5,8 @@ using System.Net.Sockets;
 namespace MonsterTradingCardGame {
     internal class PostRequestHandler : RequestHandler {
         private GameHandler gameHandler;
-        public PostRequestHandler(Database db, GameHandler gameHandler) : base(db) {
-            this.gameHandler = gameHandler;
+        public PostRequestHandler(Database db) : base(db) {
+            this.gameHandler = new (db);
         }
         private const int defaultPlayerCoins = 20;
         private const int defaultPackageCost = 5;
@@ -19,7 +19,7 @@ namespace MonsterTradingCardGame {
             }
             if (!db.isConnected()) {
                 string errMsg = "unexpected internal error";
-                writeErr(client, HttpStatusCode.InternalServerError, errMsg);
+                writeStructuredResponse(client, HttpStatusCode.InternalServerError, errMsg);
                 return;
             }
             Guid? userId = db.verifyUser(body["username"].ToString(), body["password"].ToString());
@@ -44,20 +44,27 @@ namespace MonsterTradingCardGame {
                 writeForbiddenErr(client);
                 return;
             }
+            string responseMsg;
             try {
                 bool result = db.addUser(
                         body["username"].ToString(),
                         body["password"].ToString(),
                         defaultPlayerCoins,
-                        Enum.Parse<Role>(body["role"].ToString())
+                        Enum.Parse<Role>(body["role"].ToString()),
+                        out string errMsg
                         );
 
                 if (!result) {
-                    string msg = "unexpected error while creating new user";
-                    writeErr(client, HttpStatusCode.InternalServerError, msg);
+                    if (errMsg == "user already exists") {
+                        writeStructuredResponse(client, HttpStatusCode.Conflict, errMsg);
+                        return;
+                    }
+                    responseMsg = "unexpected error while creating new user";
+                    writeStructuredResponse(client, HttpStatusCode.InternalServerError, responseMsg);
                     return;
                 } else {
-                    writeResponse(client, HttpStatusCode.Created, null);
+                    responseMsg = "user created successfully";
+                    writeStructuredResponse(client, HttpStatusCode.Created, responseMsg);
                     return;
                 }
             } catch (Exception e) {
@@ -87,10 +94,11 @@ namespace MonsterTradingCardGame {
                     );
                 if (!result) {
                     string msg = "unexpected error while creating new card";
-                    writeErr(client, HttpStatusCode.InternalServerError, msg);
+                    writeStructuredResponse(client, HttpStatusCode.InternalServerError, msg);
                     return;
                 } else {
-                    writeResponse(client, HttpStatusCode.Created, null);
+                    string msg = "card created successfully";
+                    writeStructuredResponse(client, HttpStatusCode.Created, msg);
                     return;
                 }
             } catch (Exception e) {
@@ -103,14 +111,14 @@ namespace MonsterTradingCardGame {
         public void buyPackage(TcpClient client, JObject body, User user) {
             if (user.coins < defaultPackageCost) {
                 string msg = "not enough coins to buy package";
-                writeErr(client, HttpStatusCode.BadRequest, msg);
+                writeStructuredResponse(client, HttpStatusCode.BadRequest, msg);
                 return;
             }
 
             List<Card>? package = db.buyPackage(user.id, defaultPackageCost);
             if (package == null) {
                 string msg = "unexpected error while trying to get package";
-                writeErr(client, HttpStatusCode.InternalServerError, msg);
+                writeStructuredResponse(client, HttpStatusCode.InternalServerError, msg);
                 return;
             }
 
@@ -123,32 +131,35 @@ namespace MonsterTradingCardGame {
                 return;
             }
             List<int> cards = body["cards"].Select(e => int.Parse((string)e)).ToList();
+            string responseMsg;
             if (cards.Count != deckSize) {
-                string msg = $"wrong number of cards provided.\nA deck may only contain {deckSize} number of cards";
-                writeErr(client, HttpStatusCode.BadRequest, msg);
+                responseMsg = $"wrong number of cards provided.\nA deck may only contain {deckSize} number of cards";
+                writeStructuredResponse(client, HttpStatusCode.BadRequest, responseMsg);
                 return;
             }
 
             if (!db.checkCardsInStack(user.id, cards)) {
-                string msg = "provided cards can't be used in deck";
-                writeErr(client, HttpStatusCode.BadRequest, msg);
+                responseMsg = "provided cards can't be used in deck";
+                writeStructuredResponse(client, HttpStatusCode.BadRequest, responseMsg);
                 return;
             }
 
             if (!db.addCardsToDeck(user.id, cards)) {
-                string msg = "unexpected error while adding cards to deck";
-                writeErr(client, HttpStatusCode.InternalServerError, msg);
+                responseMsg = "unexpected error while adding cards to deck";
+                writeStructuredResponse(client, HttpStatusCode.InternalServerError, responseMsg);
                 return;
             }
 
-            writeResponse(client, HttpStatusCode.OK, null);
+            responseMsg = "deck updated successfully";
+            writeStructuredResponse(client, HttpStatusCode.OK, responseMsg);
         }
 
         public void startGame(TcpClient client, JObject body, User user) {
             List<Tuple<int, Card>>? deck = db.getDeck(user.id);
+            string responseMsg;
             if (deck == null || deck.Count != deckSize) {
-                string msg = "no valid deck defined";
-                writeErr(client, HttpStatusCode.BadRequest, msg);
+                responseMsg = "no valid deck defined";
+                writeStructuredResponse(client, HttpStatusCode.BadRequest, responseMsg);
                 return;
             }
             JObject response = new();
@@ -158,33 +169,49 @@ namespace MonsterTradingCardGame {
             }
 
             if (status == Status.WAITING) {
-                response["status"] = Enum.GetName(typeof(Status), status);
+                response["state"] = Enum.GetName(typeof(Status), status);
                 writeResponse(client, HttpStatusCode.Accepted, response);
                 return;
             } else if (status == Status.FAILED) {
-                string msg = "unexpected error while finishing game";
-                writeResponse(client, HttpStatusCode.InternalServerError, msg);
+                responseMsg = "unexpected error while finishing game";
+                writeResponse(client, HttpStatusCode.InternalServerError, responseMsg);
+                return;
+            } else if (status == Status.FINISHED) {
+                Tuple<FightResult, string>? protocol = gameHandler.getProtocol(user.id);
+                if (protocol == null) {
+                    responseMsg = "unexpected error while finishing game";
+                    writeStructuredResponse(client, HttpStatusCode.InternalServerError, responseMsg);
+                    return;
+                }
+                response["state"] = Enum.GetName(typeof(Status), status);
+                response["result"] = Enum.GetName(typeof(FightResult), protocol.Item1);
+                response["protocol"] = protocol.Item2;
+                writeResponse(client, HttpStatusCode.OK, response);
                 return;
             } else { 
-                Thread.Sleep(400);
+                Thread.Sleep(300);
                 status = gameHandler.getStatus(user.id);
                 if (status == Status.FINISHED) {
-                    string? protocol = gameHandler.getProtocol(user.id);
+                    Tuple<FightResult, string>? protocol = gameHandler.getProtocol(user.id);
                     if (protocol == null) {
-                        string msg = "unexpected error while finishing game";
-                        writeErr(client, HttpStatusCode.InternalServerError, msg);
+                        responseMsg = "unexpected error while finishing game";
+                        writeStructuredResponse(client, HttpStatusCode.InternalServerError, responseMsg);
                         return;
                     }
-                    response["status"] = Enum.GetName(typeof(Status), status);
-                    response["protocol"] = protocol;
+                    response["state"] = Enum.GetName(typeof(Status), status);
+                    response["result"] = Enum.GetName(typeof(FightResult), protocol.Item1);
+                    response["protocol"] = protocol.Item2;
                     writeResponse(client, HttpStatusCode.OK, response);
                     return;
                 } else if (status == Status.FAILED) {
-                    string msg = "game failed";
-                    writeErr(client, HttpStatusCode.InternalServerError, msg);
+                    responseMsg = "game failed";
+                    writeStructuredResponse(client, HttpStatusCode.InternalServerError, responseMsg);
                     return;
+                } else if (status == null) {
+                    responseMsg = "unexpected error";
+                    writeStructuredResponse(client, HttpStatusCode.InternalServerError, responseMsg);
                 } else {
-                    response["status"] = Enum.GetName(typeof(Status), status);
+                    response["state"] = Enum.GetName(typeof(Status), status);
                     writeResponse(client, HttpStatusCode.Accepted, response);
                     return;
                 }

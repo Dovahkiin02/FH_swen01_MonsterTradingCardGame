@@ -31,7 +31,7 @@ namespace MonsterTradingCardGame {
             this.port = port;
             this.db = db;
             getRequestHandlers = new(db);
-            postRequestHandlers = new(db, new GameHandler(db));
+            postRequestHandlers = new(db);
             addRoutes();
         }
 
@@ -63,7 +63,7 @@ namespace MonsterTradingCardGame {
                 request = parseRequest(requestString);
             } catch (Exception e) {
                 errMsg = "malformed request";
-                RequestHandler.writeErr(client, HttpStatusCode.BadRequest, errMsg);
+                RequestHandler.writeStructuredResponse(client, HttpStatusCode.BadRequest, errMsg);
 
                 return;
             }
@@ -71,11 +71,13 @@ namespace MonsterTradingCardGame {
             if (request.headers.TryGetValue("Authorization", out string? token)) {
                 Guid? userId = JwtHandler.validateJwt(token);
                 if (userId == null) {
+                    Console.WriteLine("invalid token");
                     RequestHandler.writeUnauthorizedErr(client);
                     return;
                 }
                 currentUser = db.getUser(userId.Value);
                 if (currentUser == null) {
+                    Console.WriteLine("user for token doesn't exist anymore");
                     RequestHandler.writeUnauthorizedErr(client);
                     return;
                 }
@@ -90,12 +92,12 @@ namespace MonsterTradingCardGame {
                     handler(client, request.body, currentUser);
                 } else {
                     errMsg = "resource not found";
-                    RequestHandler.writeErr(client, HttpStatusCode.NotFound, errMsg);
+                    RequestHandler.writeStructuredResponse(client, HttpStatusCode.NotFound, errMsg);
                     return;
                 }
             } else {
                 errMsg = "resource not found";
-                RequestHandler.writeErr(client, HttpStatusCode.NotFound, errMsg);
+                RequestHandler.writeStructuredResponse(client, HttpStatusCode.NotFound, errMsg);
                 return;
             }
         }

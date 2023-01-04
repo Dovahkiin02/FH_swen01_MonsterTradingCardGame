@@ -24,6 +24,10 @@ namespace MonsterTradingCardGame {
             if (token == null || token == "") {
                 return null;
             }
+            string bearer = "Bearer ";
+            if (token.StartsWith(bearer)) {
+                token = token.Substring(bearer.Length);
+            }
             TokenValidationParameters parameters = new () {
                 ValidateAudience = false,
                 ValidateIssuer = true,

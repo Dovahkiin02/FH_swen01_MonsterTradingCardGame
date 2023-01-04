@@ -15,7 +15,7 @@ create table if not exists player (
 ,	role     int  not null
 ,	wins	 int  not null
 ,   defeats  int  not null
-,   ties     int  not null
+,   draws    int  not null
 );
 
 create table if not exists card (
@@ -48,7 +48,7 @@ create table if not exists deck (
 );
 
 insert into player
-	(id, name, password, coins, role, wins, defeats, ties)
+	(id, name, password, coins, role, wins, defeats, draws)
 values
 	(default, 'admin', crypt('asdf', gen_salt('bf')), 20, 0, 0, 0, 0)
 ;

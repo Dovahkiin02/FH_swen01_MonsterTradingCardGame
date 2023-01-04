@@ -16,5 +16,5 @@ namespace MonsterTradingCardGame {
         int coins,
         int wins = 0,
         int defeats = 0,
-        int ties = 0);
+        int draws = 0);
 }

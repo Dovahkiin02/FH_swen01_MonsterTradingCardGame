@@ -13,10 +13,16 @@ namespace MonsterTradingCardGame {
         FAILED
     }
 
+    enum FightResult {
+        PLAYER1,
+        PLAYER2,
+        DRAW
+    }
+
     internal class GameHandler {
         private Database db;
         private ConcurrentDictionary<Guid, Status> ledger = new();
-        private ConcurrentDictionary<Guid, string> protocols = new();
+        private ConcurrentDictionary<Guid, Tuple<FightResult, string>> protocols = new();
         private Dictionary<Element, Tuple<float, float, float, float>> elementInteractions = new();
         private Dictionary<Type, Dictionary<Type, float>> typeInteractions = new();
 
@@ -28,6 +34,12 @@ namespace MonsterTradingCardGame {
             setTypeInteractions();
         }
 
+        public Status? viewStatus(Guid userId) {
+            if (ledger.TryGetValue(userId, out Status status)) {
+                return status;
+            }
+            return null;
+        }
         public Status? getStatus(Guid userId) {
             if (ledger.TryGetValue(userId, out Status status)) {
                 if (status == Status.FINISHED || status == Status.FAILED) { // if game finished remove the entry
@@ -38,8 +50,8 @@ namespace MonsterTradingCardGame {
             return null;
         }
 
-        public string? getProtocol(Guid userId) {
-            if (protocols.TryRemove(userId, out string? protocol)) {
+        public Tuple<FightResult, string>? getProtocol(Guid userId) {
+            if (protocols.TryRemove(userId, out Tuple<FightResult, string>? protocol)) {
                 return protocol;
             }
             return null;
@@ -103,9 +115,23 @@ namespace MonsterTradingCardGame {
                 protocol.AppendLine((record with { player1 = username1, player2 = username2 }).ToString());
             }
 
+            FightResult fightResult;
+            if (deck1.Count == 0) { // Player1 lost
+                protocol.AppendLine($"{username2} wins");
+                fightResult = FightResult.PLAYER2;
+            } else if (deck2.Count == 0) { // Player2 lost
+                protocol.AppendLine($"{username1} wins");
+                fightResult = FightResult.PLAYER1;
+            } else { // Tie
+                protocol.AppendLine($"draw");
+                fightResult = FightResult.DRAW;
+            }
+
+            db.updateStats(user1, user2, fightResult);
+
             gameFinished(user1, user2);
-            protocols.AddOrUpdate(user1, protocol.ToString(), (key, value) => protocol.ToString());
-            protocols.AddOrUpdate(user2, protocol.ToString(), (key, value) => protocol.ToString());
+            protocols.AddOrUpdate(user1, Tuple.Create(fightResult, protocol.ToString()), (key, value) => Tuple.Create(fightResult, protocol.ToString()));
+            protocols.AddOrUpdate(user2, Tuple.Create(fightResult, protocol.ToString()), (key, value) => Tuple.Create(fightResult, protocol.ToString()));
         }
 
         private FightRecord fight(Card card1, Card card2) {
@@ -115,7 +141,7 @@ namespace MonsterTradingCardGame {
             } else if (card1.damage < card2.damage) {
                 result = FightResult.PLAYER2;
             } else {
-                result = FightResult.TIE;
+                result = FightResult.DRAW;
             }
 
             return new FightRecord(card1.name, card1.damage, card2.name, card2.damage, result);
@@ -153,12 +179,6 @@ namespace MonsterTradingCardGame {
 
         }
 
-        private enum FightResult {
-            PLAYER1,
-            PLAYER2,
-            TIE
-        }
-
         private record FightRecord(string cardName1, float cardDamage1, string cardName2, float cardDamage2, FightResult fightResult, string player1 = "Player1", string player2 = "Player2") {
             public override string ToString() {
                 string resultPhrase;
@@ -167,7 +187,7 @@ namespace MonsterTradingCardGame {
                 } else if (fightResult == FightResult.PLAYER2) {
                     resultPhrase = cardName2 + " wins";
                 } else {
-                    resultPhrase = "tie";
+                    resultPhrase = "draw";
                 }
                 return $"{player1}: {cardName1} ({cardDamage1} Damage) vs {player2}: {cardName2} ({cardDamage2} Damage) => {resultPhrase}";
             }

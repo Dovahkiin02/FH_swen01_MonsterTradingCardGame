@@ -39,7 +39,7 @@ namespace MonsterTradingCardGame {
             return error;
         }
 
-        public static void writeErr(TcpClient client, HttpStatusCode status, string msg) {
+        public static void writeStructuredResponse(TcpClient client, HttpStatusCode status, string msg) {
             writeResponse(client, status, buildError(status, msg));
         }
 
