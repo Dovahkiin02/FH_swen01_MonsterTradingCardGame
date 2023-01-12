@@ -1,12 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using System.Threading.Tasks;
 
 namespace MonsterTradingCardGame {
     internal class GetRequestHandlers : RequestHandler {
@@ -17,24 +11,26 @@ namespace MonsterTradingCardGame {
             List<Tuple<int, Card>>? stack = db.getStack(user.id);
             if (stack == null) {
                 string msg = "unexpected error while trying to fetch stack";
-                writeStructuredResponse(client, System.Net.HttpStatusCode.InternalServerError, msg);
+                writeStructuredResponse(client, HttpStatusCode.InternalServerError, msg);
                 return;
             }
 
-            writeResponse(client, System.Net.HttpStatusCode.OK, stack);            
+            writeResponse(client, HttpStatusCode.OK, stack);            
         }
 
         public void getDeck(TcpClient client, JObject body, User user) {
             List<Tuple<int, Card>>? deck = db.getDeck(user.id);
             if (deck == null) {
                 string msg = "unexpected error while trying to fetch stack";
-                writeStructuredResponse(client, System.Net.HttpStatusCode.InternalServerError, msg);
+                writeStructuredResponse(client, HttpStatusCode.InternalServerError, msg);
                 return;
             }
 
             writeResponse(client, System.Net.HttpStatusCode.OK, deck);
         }
 
-        public void getStats(TcpClient client, JObject body, User user) { }
+        public void getUser(TcpClient client, JObject body, User user) {
+            writeResponse(client, HttpStatusCode.OK, user.toResponseObject());
+        }
     }
 }

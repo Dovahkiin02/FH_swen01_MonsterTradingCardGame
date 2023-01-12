@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "Qy5TQqbpU5bweUoq2MXjDkrcGgYA8RaIvTkHfxUgp6asAM/zf4d8LXW+gGgcQjYEKHeG7qRLTrH0ck/vQOlmyA==",
+  "dgSpecHash": "XkJCPf56Lvw7OnHTrMwKNjrMpTc2XDOsRNZHeFsEq9J0l1ni5f99E2UL6M31NkTbm6LZy/Ky6TLt2xNoPe8pLA==",
   "success": true,
   "projectFilePath": "C:\\Users\\Manuel_work\\Documents\\FH\\FH\\swen_01\\FH_swen01_MonsterTradingCardGame\\MonsterTradingCardGame\\MonsterTradingCardGame\\MonsterTradingCardGame.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\Manuel_work\\.nuget\\packages\\commandlineparser\\2.9.1\\commandlineparser.2.9.1.nupkg.sha512",
     "C:\\Users\\Manuel_work\\.nuget\\packages\\microsoft.csharp\\4.5.0\\microsoft.csharp.4.5.0.nupkg.sha512",
     "C:\\Users\\Manuel_work\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\6.0.0\\microsoft.extensions.logging.abstractions.6.0.0.nupkg.sha512",
     "C:\\Users\\Manuel_work\\.nuget\\packages\\microsoft.identitymodel.abstractions\\6.25.1\\microsoft.identitymodel.abstractions.6.25.1.nupkg.sha512",

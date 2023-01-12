@@ -13,7 +13,7 @@ namespace MonsterTradingCardGame {
         private const int deckSize = 4;
 
         public void login(TcpClient client, JObject body, User _user) {
-            if (!checkKeys(body, new[] { "username", "password" })) {
+            if (!checkKeys(body, new[] { "name", "password" })) {
                 writeMalformedBodyErr(client);
                 return;
             }
@@ -22,7 +22,7 @@ namespace MonsterTradingCardGame {
                 writeStructuredResponse(client, HttpStatusCode.InternalServerError, errMsg);
                 return;
             }
-            Guid? userId = db.verifyUser(body["username"].ToString(), body["password"].ToString());
+            Guid? userId = db.verifyUser(body["name"].ToString(), body["password"].ToString());
             if (userId != null) {
                 JObject response = new() {
                     ["Token"] = JwtHandler.getJwt(userId.Value)
@@ -36,7 +36,7 @@ namespace MonsterTradingCardGame {
         }
 
         public void addUser(TcpClient client, JObject body, User user) {
-            if (!checkKeys(body, new[] { "username", "password", "role" })) {
+            if (!checkKeys(body, new[] { "name", "password", "role" })) {
                 writeMalformedBodyErr(client);
                 return;
             }
@@ -47,7 +47,7 @@ namespace MonsterTradingCardGame {
             string responseMsg;
             try {
                 bool result = db.addUser(
-                        body["username"].ToString(),
+                        body["name"].ToString(),
                         body["password"].ToString(),
                         defaultPlayerCoins,
                         Enum.Parse<Role>(body["role"].ToString()),
@@ -216,6 +216,20 @@ namespace MonsterTradingCardGame {
                     return;
                 }
             }
+        }
+
+        public void addOffer(TcpClient client, JObject body, User user) {
+            if (!checkKeys(body, new[] { "card", "price" })) {
+                writeMalformedBodyErr(client);
+                return;
+            }
+            if (!db.cardInStack(user.id, int.Parse(body["card"].ToString()))) {
+                string msg = "card doesn't exist in stack of user";
+                writeStructuredResponse(client, HttpStatusCode.BadRequest, msg);
+                return;
+            }
+
+
         }
     }
 }

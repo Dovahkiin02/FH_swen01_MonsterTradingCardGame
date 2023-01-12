@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System.Collections;
+using System.Data;
 using System.Reflection.PortableExecutable;
 using System.Text;
 using Npgsql;
@@ -44,15 +45,15 @@ namespace MonsterTradingCardGame {
             cmd.ExecuteNonQuery();
         }
 
-        public Guid? verifyUser(string username, string password) {
+        public Guid? verifyUser(string name, string password) {
             string sql = @"
                 select id
                   from player
-                 where name = @username
+                 where name = @name
                    and password = crypt(@password, password)
                 ;";
             using NpgsqlCommand cmd = new NpgsqlCommand(sql, con);
-            cmd.Parameters.AddWithValue("@username", username);
+            cmd.Parameters.AddWithValue("@name", name);
             cmd.Parameters.AddWithValue("@password", password);
             object? result = cmd.ExecuteScalar();
             if (result == null) {
@@ -76,7 +77,7 @@ namespace MonsterTradingCardGame {
             return result.ToString();
         }
 
-        public bool addUser(string username, string password, int coins, Role role, out string errMsg) {
+        public bool addUser(string name, string password, int coins, Role role, out string errMsg) {
             errMsg = "";
             string sql = @"
                 insert into player
@@ -85,7 +86,7 @@ namespace MonsterTradingCardGame {
                     (default, @name, crypt(@password, gen_salt('bf')), @coins, @role,  0  ,   0    , 0   )
                 ;";
             using NpgsqlCommand cmd = new(sql, con);
-            cmd.Parameters.AddWithValue("@name", username);
+            cmd.Parameters.AddWithValue("@name", name);
             cmd.Parameters.AddWithValue("@password", password);
             cmd.Parameters.AddWithValue("@coins", coins);
             cmd.Parameters.AddWithValue("@role", (int)role);
@@ -116,7 +117,7 @@ namespace MonsterTradingCardGame {
             }
             return new User(
                 id: reader.GetGuid(0), 
-                username: reader.GetString(1), 
+                name: reader.GetString(1), 
                 role: (Role)reader.GetInt16(2), 
                 coins: reader.GetInt32(3), 
                 wins: reader.GetInt32(4), 
@@ -125,16 +126,33 @@ namespace MonsterTradingCardGame {
                 );
         }
 
-        public int getCoins(Guid userId) {
+        public bool updateUser(Guid userId, Dictionary<string, object> parameter) {
+            if (parameter == null || parameter.Count == 0) {
+                return false;
+            }
             string sql = @"
-                select coins
-                  from player
+                update player
+                   set {0}
                  where id = @id
-                 ;";
+                ;";
+            
+            sql = string.Format(sql, string.Join(", ", parameter.Keys.Select(e => 
+                                            $"{e} = {(e == "password" ? $"crypt(@{e}, gen_salt('bf'))" : $"@{e}")}"
+                                            ).ToList()));
 
-            using NpgsqlCommand cmd = new NpgsqlCommand(sql);
-            cmd.Parameters.AddWithValue("@id", userId);
-            return int.Parse(cmd.ExecuteScalar()?.ToString() ?? "-1");
+            using NpgsqlCommand cmd = new (sql, con);
+            cmd.Parameters.AddWithValue("id", userId);
+            parameter.ToList().ForEach(kvp => cmd.Parameters.AddWithValue(kvp.Key, kvp.Value));
+            try {
+                int result = cmd.ExecuteNonQuery();
+                if (result <= 0) {
+                    return false;
+                }
+                return true;
+            } catch (Exception e) {
+                Console.WriteLine(e.Message);
+                return false;
+            }    
         }
 
         public bool addCard(string name, Element elemet, int damage, Type type) {
@@ -145,16 +163,29 @@ namespace MonsterTradingCardGame {
                     (default, @name, @element, @damage, @type)
                 ;";
             using NpgsqlCommand cmd = new(sql, con);
-            cmd.Parameters.AddWithValue("@name"   , name);
-            cmd.Parameters.AddWithValue("@element", (int)elemet);
-            cmd.Parameters.AddWithValue("@damage" , damage);
-            cmd.Parameters.AddWithValue("@type"   , (int)type);
+            cmd.Parameters.AddWithValue("name"   , name);
+            cmd.Parameters.AddWithValue("element", (int)elemet);
+            cmd.Parameters.AddWithValue("damage" , damage);
+            cmd.Parameters.AddWithValue("type"   , (int)type);
             try {
                 return cmd.ExecuteNonQuery() > 0;
             } catch (Exception e) {
                 Console.WriteLine(e.Message);
                 return false;
             }
+        }
+
+        public bool cardInStack(Guid userId, int cardId) {
+            string sql = @"
+                select id
+                  from stack
+                 where user = @user
+                   and card = @card
+                ;";
+            using NpgsqlCommand cmd = new(sql, con);
+            cmd.Parameters.AddWithValue("user", userId);
+            cmd.Parameters.AddWithValue("card", cardId);
+            return cmd.ExecuteScalar() != null;
         }
 
         private string repeatString(string str, int count) {
@@ -267,8 +298,7 @@ namespace MonsterTradingCardGame {
             return package;
         }
 
-        public List<Tuple<int, Card>>? getStack(Guid userId) {
-            
+        public List<Tuple<int, Card>>? getStack(Guid userId) {   
             string sql = @"
                 select s.id, c.id as cardId, c.name, c.element, c.damage, c.type
                   from stack s

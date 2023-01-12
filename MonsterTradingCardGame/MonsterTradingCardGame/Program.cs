@@ -9,6 +9,13 @@ db.connect();
 //db.setup();
 Server s = new Server(9999, db);
 s.Start();
+//Guid user = Guid.Parse("acf61bab-d16f-4382-aaf7-5e31ca029a15");
+//Dictionary<string, string> parameter = new() {
+//    ["name"] = "manuel",
+//    ["password"] = "asdf"
+//};
+
+//Console.WriteLine(db.updateUser(user, parameter));
 
 //Guid user1 = Guid.Parse("d95817b7-016b-41af-bb6f-8048b7ab036f");
 //Guid user2 = Guid.Parse("48c553b2-b190-4c56-bdc6-cbbd837fdf6a");

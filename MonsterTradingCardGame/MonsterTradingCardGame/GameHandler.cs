@@ -23,6 +23,7 @@ namespace MonsterTradingCardGame {
         private Database db;
         private ConcurrentDictionary<Guid, Status> ledger = new();
         private ConcurrentDictionary<Guid, Tuple<FightResult, string>> protocols = new();
+        
         private Dictionary<Element, Tuple<float, float, float, float>> elementInteractions = new();
         private Dictionary<Type, Dictionary<Type, float>> typeInteractions = new();
 

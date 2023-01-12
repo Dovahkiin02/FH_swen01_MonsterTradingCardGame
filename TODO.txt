@@ -1,0 +1,7 @@
+# TODO:
+- Unit tests
+- Store
+- game logic
+- [DONE] update user (password isn't encrypted so far)
+- client (mandatory unique feature)
+- elo system

@@ -32,7 +32,7 @@ namespace MonsterTradingCardGame {
             }
         }
 
-        private static JObject buildError(HttpStatusCode status, string msg) {
+        private static JObject buildJson(HttpStatusCode status, string msg) {
             var error = new JObject();
             error["status"] = (int)status;
             error["message"] = msg;
@@ -40,25 +40,25 @@ namespace MonsterTradingCardGame {
         }
 
         public static void writeStructuredResponse(TcpClient client, HttpStatusCode status, string msg) {
-            writeResponse(client, status, buildError(status, msg));
+            writeResponse(client, status, buildJson(status, msg));
         }
 
         public static void writeUnauthorizedErr(TcpClient client) {
             string msg = "unauthorized access";
             HttpStatusCode status = HttpStatusCode.Unauthorized;
-            writeResponse(client, status, buildError(status, msg));
+            writeResponse(client, status, buildJson(status, msg));
         }
 
         public static void writeForbiddenErr(TcpClient client) {
             string msg = "unauthorized access";
             HttpStatusCode status = HttpStatusCode.Forbidden;
-            writeResponse(client, status, buildError(status, msg));
+            writeResponse(client, status, buildJson(status, msg));
         }
 
         public static void writeMalformedBodyErr(TcpClient client) {
             string msg = "malformed body";
             HttpStatusCode status = HttpStatusCode.BadRequest;
-            writeResponse(client, status, buildError(status, msg));
+            writeResponse(client, status, buildJson(status, msg));
         }
 
         public static void writeResponse(TcpClient client, HttpStatusCode status, object? data) {

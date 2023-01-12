@@ -13,8 +13,12 @@
         "packagesPath": "C:\\Users\\Manuel_work\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\Manuel_work\\Documents\\FH\\FH\\swen_01\\FH_swen01_MonsterTradingCardGame\\MonsterTradingCardGame\\MonsterTradingCardGame\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
           "C:\\Users\\Manuel_work\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -22,6 +26,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -40,6 +45,10 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
+            "CommandLineParser": {
+              "target": "Package",
+              "version": "[2.9.1, )"
+            },
             "Newtonsoft.Json": {
               "target": "Package",
               "version": "[13.0.2, )"

@@ -11,6 +11,7 @@ namespace MonsterTradingCardGame {
         private readonly Database db;
         private readonly GetRequestHandlers getRequestHandlers;
         private readonly PostRequestHandler postRequestHandlers;
+        private readonly PutRequestHandler putRequestHandler;
 
         private void addRoutes() {
             routes.Add("GET", new Dictionary<string, Action<TcpClient, JObject, User>> {
@@ -25,6 +26,9 @@ namespace MonsterTradingCardGame {
                 ["/game"] = postRequestHandlers.startGame,
                 ["/transactions/package"] = postRequestHandlers.buyPackage
             });
+            routes.Add("PUT", new Dictionary<string, Action<TcpClient, JObject, User>> {
+                ["/user"] = putRequestHandler.updateUser
+            });
         }
 
         public Server(int port, Database db) {
@@ -32,6 +36,7 @@ namespace MonsterTradingCardGame {
             this.db = db;
             getRequestHandlers = new(db);
             postRequestHandlers = new(db);
+            putRequestHandler = new(db);
             addRoutes();
         }
 
@@ -56,7 +61,7 @@ namespace MonsterTradingCardGame {
             int bytesRead = client.GetStream().Read(requestData, 0, requestData.Length);
             string requestString = Encoding.UTF8.GetString(requestData, 0, bytesRead);
             string errMsg;
-
+            //Console.WriteLine(requestString);
             
             HttpRequest request;
             try {

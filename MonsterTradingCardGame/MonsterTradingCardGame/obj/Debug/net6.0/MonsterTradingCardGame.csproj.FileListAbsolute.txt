@@ -22,3 +22,4 @@ C:\Users\Manuel_work\Documents\FH\FH\swen_01\FH_swen01_MonsterTradingCardGame\Mo
 C:\Users\Manuel_work\Documents\FH\FH\swen_01\FH_swen01_MonsterTradingCardGame\MonsterTradingCardGame\MonsterTradingCardGame\bin\Debug\net6.0\Microsoft.IdentityModel.Logging.dll
 C:\Users\Manuel_work\Documents\FH\FH\swen_01\FH_swen01_MonsterTradingCardGame\MonsterTradingCardGame\MonsterTradingCardGame\bin\Debug\net6.0\Microsoft.IdentityModel.Tokens.dll
 C:\Users\Manuel_work\Documents\FH\FH\swen_01\FH_swen01_MonsterTradingCardGame\MonsterTradingCardGame\MonsterTradingCardGame\bin\Debug\net6.0\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\Manuel_work\Documents\FH\FH\swen_01\FH_swen01_MonsterTradingCardGame\MonsterTradingCardGame\MonsterTradingCardGame\bin\Debug\net6.0\CommandLine.dll

@@ -8,12 +8,21 @@
     ".NETCoreApp,Version=v6.0": {
       "MonsterTradingCardGame/1.0.0": {
         "dependencies": {
+          "CommandLineParser": "2.9.1",
           "Newtonsoft.Json": "13.0.2",
           "Npgsql": "7.0.1",
           "System.IdentityModel.Tokens.Jwt": "6.25.1"
         },
         "runtime": {
           "MonsterTradingCardGame.dll": {}
+        }
+      },
+      "CommandLineParser/2.9.1": {
+        "runtime": {
+          "lib/netstandard2.0/CommandLine.dll": {
+            "assemblyVersion": "2.9.1.0",
+            "fileVersion": "2.9.1.0"
+          }
         }
       },
       "Microsoft.CSharp/4.5.0": {},
@@ -127,6 +136,13 @@
       "type": "project",
       "serviceable": false,
       "sha512": ""
+    },
+    "CommandLineParser/2.9.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-OE0sl1/sQ37bjVsPKKtwQlWDgqaxWgtme3xZz7JssWUzg5JpMIyHgCTY9MVMxOg48fJ1AgGT3tgdH5m/kQ5xhA==",
+      "path": "commandlineparser/2.9.1",
+      "hashPath": "commandlineparser.2.9.1.nupkg.sha512"
     },
     "Microsoft.CSharp/4.5.0": {
       "type": "package",
