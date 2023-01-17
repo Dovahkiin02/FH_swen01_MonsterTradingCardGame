@@ -1,7 +1,7 @@
 # Monster Trading Card Game 
 ## Design
 The first step for me when I started designing this project was making an ERD for the database. That way I'm able to get a very fast understanding of the scope of the work. Here the ERD of my Database:
-![ERD image](https://github.com/Dovahkiin02/FH_swen01_MonsterTradingCardGame/blob/master/imgs/FH_swen01_MonsterTradingCardGame.png?raw=true)
+![ERD image](imgs/FH_swen01_MonsterTradingCardGame.png)
 
 After designing and building the database, I built the methods in c# that will access the database.
 Next I built a basic Server that can listen to and parse requests.
