@@ -17,7 +17,8 @@ namespace MonsterTradingCardGame {
         int coins,
         int wins = 0,
         int defeats = 0,
-        int draws = 0) {
+        int draws = 0,
+        int elo = 0) {
         public JObject toResponseObject() {
             return new JObject() {
                 ["id"] = id,
@@ -27,6 +28,18 @@ namespace MonsterTradingCardGame {
                 ["wins"] = wins,
                 ["defeats"] = defeats,
                 ["draws"] = draws,
+                ["elo"] = elo
+            };
+        }
+
+        public JObject toScoreBoardResponseObject() {
+            return new() {
+                ["name"] = name,
+                ["wins"] = wins,
+                ["defeats"] = defeats,
+                ["draws"] = draws,
+                ["statistic"] = defeats == 0 ? wins : wins / defeats,
+                ["elo"] = elo
             };
         }
     }

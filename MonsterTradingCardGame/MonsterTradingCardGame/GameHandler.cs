@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Concurrent;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace MonsterTradingCardGame {
     enum Status {
@@ -21,10 +17,10 @@ namespace MonsterTradingCardGame {
 
     internal class GameHandler {
         private Database db;
-        private ConcurrentDictionary<Guid, Status> ledger = new();
+        internal ConcurrentDictionary<Guid, Status> ledger = new();
         private ConcurrentDictionary<Guid, Tuple<FightResult, string>> protocols = new();
-        
-        private Dictionary<Element, Tuple<float, float, float, float>> elementInteractions = new();
+
+        private Dictionary<Element, ValueTuple<float, float, float, float>> elementInteractions = new();
         private Dictionary<Type, Dictionary<Type, float>> typeInteractions = new();
 
         private const int maxFightRounds = 100;
@@ -58,7 +54,10 @@ namespace MonsterTradingCardGame {
             return null;
         }
 
-        public Status joinGame(Guid user1) {
+        public Status joinGame(Guid user1) { 
+            if (ledger.TryGetValue(user1, out Status returnStatus)) {
+                return returnStatus;
+            }
             IEnumerable<Guid> waitingUsers = ledger.Where(e => e.Value == Status.WAITING).Select(e => e.Key);
             if (ledger.Count == 0 || waitingUsers.Count() == 0) {
                 ledger.TryAdd(user1, Status.WAITING);
@@ -78,7 +77,7 @@ namespace MonsterTradingCardGame {
             return Status.WAITING;
         }
 
-        private void Game(Guid user1, Guid user2) {
+        internal void Game(Guid user1, Guid user2) {
             if (user1 == user2) {
                 gameFailed(user1, user2);
                 return;
@@ -96,8 +95,8 @@ namespace MonsterTradingCardGame {
 
             gameStarted(user1, user2);
 
-            StringBuilder protocol = new StringBuilder();
-            Random rand = new Random();
+            StringBuilder protocol = new();
+            Random rand = new();
             int cardIndex1, cardIndex2;
             
 
@@ -135,26 +134,59 @@ namespace MonsterTradingCardGame {
             protocols.AddOrUpdate(user2, Tuple.Create(fightResult, protocol.ToString()), (key, value) => Tuple.Create(fightResult, protocol.ToString()));
         }
 
-        private FightRecord fight(Card card1, Card card2) {
+        internal FightRecord fight(Card card1, Card card2) {
             FightResult result;
-            if (card1.damage > card2.damage) {
+            float damageCard1 = getDamageOfCard(card1, card2);
+            float damageCard2 = getDamageOfCard(card2, card1);
+
+            if (damageCard1 > damageCard2) {
                 result = FightResult.PLAYER1;
-            } else if (card1.damage < card2.damage) {
+            } else if (damageCard1 < damageCard2) {
                 result = FightResult.PLAYER2;
             } else {
                 result = FightResult.DRAW;
             }
 
-            return new FightRecord(card1.name, card1.damage, card2.name, card2.damage, result);
+            return new FightRecord(card1.name, damageCard1, card2.name, damageCard2, result);
         }
 
-         
+        internal float getDamageOfCard(Card card, Card enemyCard) {
+            if (card.type != Type.SPELL && enemyCard.type != Type.SPELL) {
+                return card.damage * getTypeMultiplicator(card.type, enemyCard.type);
+            } else {
+                return card.damage 
+                    * getElementMultiplicator(card.element, enemyCard.element) 
+                    * getTypeMultiplicator(card.type, enemyCard.type);
+            }
+        }
+
+        private float getTypeMultiplicator(Type type, Type enemeyType) {
+            if (typeInteractions.TryGetValue(type, out Dictionary<Type, float>? dict)) {
+                if (dict.TryGetValue(enemeyType, out float res)) {
+                    return res;
+                }
+            }
+            return 1;
+        }
+
+        private float getElementMultiplicator(Element ele, Element enemyEle) {
+            switch (enemyEle) {
+                case Element.NORMAL:
+                    return elementInteractions[ele].Item1;
+                case Element.FIRE:
+                    return elementInteractions[ele].Item2;
+                case Element.WATER:
+                    return elementInteractions[ele].Item3;
+                default: // Grass
+                    return elementInteractions[ele].Item4;
+            }
+        }
 
         private void setElementInteractions() {
-            elementInteractions.Add(Element.NORMAL, Tuple.Create(1f, 1f, 1f, 1f));
-            elementInteractions.Add(Element.FIRE  , Tuple.Create(1f, 0.5f, 0.5f, 2f));
-            elementInteractions.Add(Element.WATER , Tuple.Create(1f, 2f, 0.5f, 0.5f));
-            elementInteractions.Add(Element.GRASS , Tuple.Create(1f, 0.5f, 2f, 0.5f));
+            elementInteractions.Add(Element.NORMAL, (1f, 1f, 1f, 1f));
+            elementInteractions.Add(Element.FIRE  , (1f, 0.5f, 0.5f, 2f));
+            elementInteractions.Add(Element.WATER , (1f, 2f, 0.5f, 0.5f));
+            elementInteractions.Add(Element.GRASS , (1f, 0.5f, 2f, 0.5f));
         }
 
         private void setTypeInteractions() {
@@ -180,7 +212,7 @@ namespace MonsterTradingCardGame {
 
         }
 
-        private record FightRecord(string cardName1, float cardDamage1, string cardName2, float cardDamage2, FightResult fightResult, string player1 = "Player1", string player2 = "Player2") {
+        internal record FightRecord(string cardName1, float cardDamage1, string cardName2, float cardDamage2, FightResult fightResult, string player1 = "Player1", string player2 = "Player2") {
             public override string ToString() {
                 string resultPhrase;
                 if (fightResult == FightResult.PLAYER1) {

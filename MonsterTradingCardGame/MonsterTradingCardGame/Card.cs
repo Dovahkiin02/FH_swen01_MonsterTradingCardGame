@@ -18,19 +18,18 @@ namespace MonsterTradingCardGame {
         KRAKEN,
         ELF,
     }
+
     [JsonObject]
     public record Card (int id, string name, Element element, int damage, Type type) {
         public override string ToString() {
             return $@"
                 id: {id},
                 name: {name},
-                element: {element.ToString()},
+                element: {element},
                 damage: {damage},
-                type: {type.ToString()}
+                type: {type}
             ";
         }
-
-        
 
         public static Card buildCard(JToken jToken) => new(
             jToken.Value<int>("id"),
@@ -40,6 +39,12 @@ namespace MonsterTradingCardGame {
             jToken.Value<Type>("type")
             );
 
-        
+        public JObject toResponseObject() => new() {
+            ["id"] = id,
+            ["name"] = name,
+            ["element"] = Enum.GetName(element),
+            ["damage"] = (int)damage,
+            ["type"] = Enum.GetName(type)
+        };
     }
 }

@@ -1,6 +1,6 @@
-drop table if exists stack;
 drop table if exists deck;
 drop table if exists store;
+drop table if exists stack;
 drop table if exists card;
 drop table if exists player;
 
@@ -16,6 +16,7 @@ create table if not exists player (
 ,	wins	 int  not null
 ,   defeats  int  not null
 ,   draws    int  not null
+,	elo      int  not null
 );
 
 create table if not exists card (
@@ -26,29 +27,26 @@ create table if not exists card (
 ,	type    int    not null
 );
 
-create table store (
-	id          serial primary key
-,	card        int  not null references card(id)
-,   seller      uuid not null references player(id)
-,	price_card  int           references card(id)
-,	price_coins int
-,	active      bool not null
+create table if not exists stack (
+	id      serial primary key
+,	player  uuid not null references player(id)
+,   card    int  not null references card(id)
+,	inDeck  bool not null
 );
 
-create table if not exists stack (
-	id serial primary key
-,	player uuid not null references player(id)
-,   card   int  not null references card(id)
+create table store (
+	stackid int primary key references stack(id)
+,	price int not null
 );
 
 create table if not exists deck (
-	id int generated always as identity
+	id 	   int  primary key references stack(id)
 ,	player uuid not null references player(id)
 ,   card   int  not null references card(id)
 );
 
 insert into player
-	(id, name, password, coins, role, wins, defeats, draws)
+	(id, name, password, coins, role, wins, defeats, draws, elo)
 values
-	(default, 'admin', crypt('asdf', gen_salt('bf')), 20, 0, 0, 0, 0)
+	(default, 'admin', crypt('asdf', gen_salt('bf')), 20, 0, 0, 0, 0, 0)
 ;

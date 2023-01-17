@@ -1,7 +1,11 @@
 # TODO:
-- Unit tests
-- Store
-- game logic
+- [DONE] Unit tests
+- [DONE] elo system
+- [DONE] game logic
 - [DONE] update user (password isn't encrypted so far)
+- [DONE] Store
+- [DONE] Scoreboard
+
 - client (mandatory unique feature)
-- elo system
+- curl script
+- Protocol

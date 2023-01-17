@@ -23,3 +23,9 @@ C:\Users\Manuel_work\Documents\FH\FH\swen_01\FH_swen01_MonsterTradingCardGame\Mo
 C:\Users\Manuel_work\Documents\FH\FH\swen_01\FH_swen01_MonsterTradingCardGame\MonsterTradingCardGame\MonsterTradingCardGame\bin\Debug\net6.0\Microsoft.IdentityModel.Tokens.dll
 C:\Users\Manuel_work\Documents\FH\FH\swen_01\FH_swen01_MonsterTradingCardGame\MonsterTradingCardGame\MonsterTradingCardGame\bin\Debug\net6.0\System.IdentityModel.Tokens.Jwt.dll
 C:\Users\Manuel_work\Documents\FH\FH\swen_01\FH_swen01_MonsterTradingCardGame\MonsterTradingCardGame\MonsterTradingCardGame\bin\Debug\net6.0\CommandLine.dll
+C:\Users\Manuel_work\Documents\FH\FH\swen_01\FH_swen01_MonsterTradingCardGame\MonsterTradingCardGame\MonsterTradingCardGame\bin\Debug\net6.0\MonsterTradingCardGame.dll.config
+C:\Users\Manuel_work\Documents\FH\FH\swen_01\FH_swen01_MonsterTradingCardGame\MonsterTradingCardGame\MonsterTradingCardGame\bin\Debug\net6.0\Microsoft.Data.Tools.Schema.Sql.dll
+C:\Users\Manuel_work\Documents\FH\FH\swen_01\FH_swen01_MonsterTradingCardGame\MonsterTradingCardGame\MonsterTradingCardGame\bin\Debug\net6.0\Microsoft.Data.Tools.Schema.Sql.UnitTesting.dll
+C:\Users\Manuel_work\Documents\FH\FH\swen_01\FH_swen01_MonsterTradingCardGame\MonsterTradingCardGame\MonsterTradingCardGame\bin\Debug\net6.0\Microsoft.Data.Tools.Schema.Sql.UnitTestingAdapter.dll
+C:\Users\Manuel_work\Documents\FH\FH\swen_01\FH_swen01_MonsterTradingCardGame\MonsterTradingCardGame\MonsterTradingCardGame\bin\Debug\net6.0\Microsoft.Data.Tools.Utilities.dll
+C:\Users\Manuel_work\Documents\FH\FH\swen_01\FH_swen01_MonsterTradingCardGame\MonsterTradingCardGame\MonsterTradingCardGame\bin\Debug\net6.0\Microsoft.SqlServer.TransactSql.ScriptDom.dll

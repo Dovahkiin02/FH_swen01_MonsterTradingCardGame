@@ -1,32 +1,17 @@
 ﻿using MonsterTradingCardGame;
-using Newtonsoft.Json.Linq;
-using System.Security.Cryptography;
-using Type = MonsterTradingCardGame.Type;
 
 Database db = new();
 db.connect();
 
 //db.setup();
-Server s = new Server(9999, db);
+Server s = new(9999, db);
 s.Start();
-//Guid user = Guid.Parse("acf61bab-d16f-4382-aaf7-5e31ca029a15");
-//Dictionary<string, string> parameter = new() {
-//    ["name"] = "manuel",
-//    ["password"] = "asdf"
-//};
 
-//Console.WriteLine(db.updateUser(user, parameter));
+//Guid manuel = Guid.Parse("d04b0154-52f6-458f-bfed-8a87e869d0b8");
+//Guid peter = Guid.Parse("ec7bc835-c921-4c88-8d90-6e714e51a40d");
+//int stackId = 1;
 
-//Guid user1 = Guid.Parse("d95817b7-016b-41af-bb6f-8048b7ab036f");
-//Guid user2 = Guid.Parse("48c553b2-b190-4c56-bdc6-cbbd837fdf6a");
+//db.addOfferToStore(stackId, 2);
+//Console.WriteLine(db.buyCardFromStore(peter, stackId));
 
-//db.updateStats(user1, user2, FightResult.DRAW);
-
-//List<Card> cards = new() {
-//    new Card(1, "a", Element.WIND, 12, Type.GOBLIN),
-//    new Card(2, "b", Element.WIND, 12, Type.GOBLIN),
-//    new Card(3, "b", Element.WIND, 12, Type.GOBLIN),
-//    new Card(4, "b", Element.WIND, 12, Type.GOBLIN),
-//};
-//Console.WriteLine(db.addCardsToDeck(Guid.Parse("2d79ff5d-c379-44ee-8ef3-239d11946c88"), cards));
 

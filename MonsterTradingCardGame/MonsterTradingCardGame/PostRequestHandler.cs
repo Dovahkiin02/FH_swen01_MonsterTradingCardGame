@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Bson;
+using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Net.Sockets;
 
@@ -9,6 +10,7 @@ namespace MonsterTradingCardGame {
             this.gameHandler = new (db);
         }
         private const int defaultPlayerCoins = 20;
+        private const int defaultPlayerElo = 100;
         private const int defaultPackageCost = 5;
         private const int deckSize = 4;
 
@@ -51,6 +53,7 @@ namespace MonsterTradingCardGame {
                         body["password"].ToString(),
                         defaultPlayerCoins,
                         Enum.Parse<Role>(body["role"].ToString()),
+                        defaultPlayerElo,
                         out string errMsg
                         );
 
@@ -144,7 +147,7 @@ namespace MonsterTradingCardGame {
                 return;
             }
 
-            if (!db.addCardsToDeck(user.id, cards)) {
+            if (!db.setDeck(user.id, cards)) {
                 responseMsg = "unexpected error while adding cards to deck";
                 writeStructuredResponse(client, HttpStatusCode.InternalServerError, responseMsg);
                 return;
@@ -218,18 +221,57 @@ namespace MonsterTradingCardGame {
             }
         }
 
-        public void addOffer(TcpClient client, JObject body, User user) {
-            if (!checkKeys(body, new[] { "card", "price" })) {
+        public void addOfferToStore(TcpClient client, JObject body, User user) {
+            if (!checkKeys(body, new[] { "id", "price" })) {
                 writeMalformedBodyErr(client);
                 return;
             }
-            if (!db.cardInStack(user.id, int.Parse(body["card"].ToString()))) {
-                string msg = "card doesn't exist in stack of user";
-                writeStructuredResponse(client, HttpStatusCode.BadRequest, msg);
+            int stackId = int.Parse(body["id"].ToString());
+            string responseMsg;
+            if (!db.checkCardAvailability(user.id, stackId)) {
+                responseMsg = "card isn't available in stack of user";
+                writeStructuredResponse(client, HttpStatusCode.BadRequest, responseMsg);
+                return;
+            }
+            if (!db.addOfferToStore(stackId, int.Parse(body["price"].ToString()))) {
+                responseMsg = "unexpected error while adding offer to store";
+                writeStructuredResponse(client, HttpStatusCode.InternalServerError, responseMsg);
                 return;
             }
 
+            responseMsg = "offer added to store";
+            writeStructuredResponse(client, HttpStatusCode.OK, responseMsg);
+            return;
+        }
 
+        public void buyOfferFromStore(TcpClient client, JObject body, User user) {
+            if (!checkKeys(body, new[] {"id"})) {
+                writeMalformedBodyErr(client);
+                return;
+            }
+            int stackId = int.Parse(body["id"].ToString());
+            string responseMsg;
+            if (!db.checkOffer(user.id, stackId)) {
+                responseMsg = "offer not available for this user";
+                writeStructuredResponse(client, HttpStatusCode.BadRequest, responseMsg);
+                return;
+            }
+
+            if (user.coins < db.getPriceOfOffer(stackId)) {
+                responseMsg = "user doesn't have enough coins to buy this offer";
+                writeStructuredResponse(client, HttpStatusCode.BadRequest, responseMsg);
+                return;
+            }
+            
+            if (!db.buyCardFromStore(user.id, stackId)) {
+                responseMsg = "unexpected error while buying offer from store";
+                writeStructuredResponse(client, HttpStatusCode.InternalServerError, responseMsg);
+                return;
+            }
+
+            responseMsg = "offer bought from store";
+            writeStructuredResponse(client, HttpStatusCode.OK, responseMsg);
+            return;
         }
     }
 }

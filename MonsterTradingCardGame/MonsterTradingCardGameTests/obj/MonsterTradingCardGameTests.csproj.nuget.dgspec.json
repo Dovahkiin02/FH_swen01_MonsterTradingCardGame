@@ -1,0 +1,180 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Users\\Manuel_work\\Documents\\FH\\FH\\swen_01\\FH_swen01_MonsterTradingCardGame\\MonsterTradingCardGame\\MonsterTradingCardGameTests\\MonsterTradingCardGameTests.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\Manuel_work\\Documents\\FH\\FH\\swen_01\\FH_swen01_MonsterTradingCardGame\\MonsterTradingCardGame\\MonsterTradingCardGameTests\\MonsterTradingCardGameTests.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\Manuel_work\\Documents\\FH\\FH\\swen_01\\FH_swen01_MonsterTradingCardGame\\MonsterTradingCardGame\\MonsterTradingCardGameTests\\MonsterTradingCardGameTests.csproj",
+        "projectName": "MonsterTradingCardGameTests",
+        "projectPath": "C:\\Users\\Manuel_work\\Documents\\FH\\FH\\swen_01\\FH_swen01_MonsterTradingCardGame\\MonsterTradingCardGame\\MonsterTradingCardGameTests\\MonsterTradingCardGameTests.csproj",
+        "packagesPath": "C:\\Users\\Manuel_work\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Manuel_work\\Documents\\FH\\FH\\swen_01\\FH_swen01_MonsterTradingCardGame\\MonsterTradingCardGame\\MonsterTradingCardGameTests\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\Manuel_work\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {
+              "C:\\Users\\Manuel_work\\Documents\\FH\\FH\\swen_01\\FH_swen01_MonsterTradingCardGame\\MonsterTradingCardGame\\MonsterTradingCardGame\\MonsterTradingCardGame.csproj": {
+                "projectPath": "C:\\Users\\Manuel_work\\Documents\\FH\\FH\\swen_01\\FH_swen01_MonsterTradingCardGame\\MonsterTradingCardGame\\MonsterTradingCardGame\\MonsterTradingCardGame.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "dependencies": {
+            "MSTest.TestAdapter": {
+              "target": "Package",
+              "version": "[2.2.8, )"
+            },
+            "MSTest.TestFramework": {
+              "target": "Package",
+              "version": "[2.2.8, )"
+            },
+            "Microsoft.NET.Test.Sdk": {
+              "target": "Package",
+              "version": "[17.1.0, )"
+            },
+            "Microsoft.QualityTools.Testing.Fakes": {
+              "target": "Package",
+              "version": "[16.11.230815, )"
+            },
+            "Moq": {
+              "target": "Package",
+              "version": "[4.18.4, )"
+            },
+            "NUnit": {
+              "target": "Package",
+              "version": "[3.13.3, )"
+            },
+            "coverlet.collector": {
+              "target": "Package",
+              "version": "[3.1.2, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.402\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\Manuel_work\\Documents\\FH\\FH\\swen_01\\FH_swen01_MonsterTradingCardGame\\MonsterTradingCardGame\\MonsterTradingCardGame\\MonsterTradingCardGame.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\Manuel_work\\Documents\\FH\\FH\\swen_01\\FH_swen01_MonsterTradingCardGame\\MonsterTradingCardGame\\MonsterTradingCardGame\\MonsterTradingCardGame.csproj",
+        "projectName": "MonsterTradingCardGame",
+        "projectPath": "C:\\Users\\Manuel_work\\Documents\\FH\\FH\\swen_01\\FH_swen01_MonsterTradingCardGame\\MonsterTradingCardGame\\MonsterTradingCardGame\\MonsterTradingCardGame.csproj",
+        "packagesPath": "C:\\Users\\Manuel_work\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Manuel_work\\Documents\\FH\\FH\\swen_01\\FH_swen01_MonsterTradingCardGame\\MonsterTradingCardGame\\MonsterTradingCardGame\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\Manuel_work\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "dependencies": {
+            "CommandLineParser": {
+              "target": "Package",
+              "version": "[2.9.1, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.2, )"
+            },
+            "Npgsql": {
+              "target": "Package",
+              "version": "[7.0.1, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[6.25.1, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.402\\RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

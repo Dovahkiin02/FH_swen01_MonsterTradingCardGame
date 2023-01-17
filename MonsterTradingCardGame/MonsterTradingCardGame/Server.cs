@@ -16,7 +16,10 @@ namespace MonsterTradingCardGame {
         private void addRoutes() {
             routes.Add("GET", new Dictionary<string, Action<TcpClient, JObject, User>> {
                 ["/stack"] = getRequestHandlers.getStack,
-                ["/deck"] = getRequestHandlers.getDeck
+                ["/deck"] = getRequestHandlers.getDeck,
+                ["/user"] = getRequestHandlers.getUser,
+                ["/store"] = getRequestHandlers.getStoreOffers,
+                ["/scoreboard"] = getRequestHandlers.getScoreboard
             });
             routes.Add("POST", new Dictionary<string, Action<TcpClient, JObject, User>> {
                 ["/login"] = postRequestHandlers.login,
@@ -24,7 +27,9 @@ namespace MonsterTradingCardGame {
                 ["/card"] = postRequestHandlers.addCard,
                 ["/deck"] = postRequestHandlers.updateDeck,
                 ["/game"] = postRequestHandlers.startGame,
-                ["/transactions/package"] = postRequestHandlers.buyPackage
+                ["/transactions/package"] = postRequestHandlers.buyPackage,
+                ["/transactions/addOffer"] = postRequestHandlers.addOfferToStore,
+                ["/transactions/buyOffer"] = postRequestHandlers.buyOfferFromStore
             });
             routes.Add("PUT", new Dictionary<string, Action<TcpClient, JObject, User>> {
                 ["/user"] = putRequestHandler.updateUser
@@ -55,23 +60,24 @@ namespace MonsterTradingCardGame {
             }
         }
 
-        private void ProcessRequest(TcpClient client) {
-            //RequestHandler.writeUnauthorizedErr(client);
+        internal void ProcessRequest(TcpClient client) {
             byte[] requestData = new byte[4096];
             int bytesRead = client.GetStream().Read(requestData, 0, requestData.Length);
             string requestString = Encoding.UTF8.GetString(requestData, 0, bytesRead);
             string errMsg;
-            //Console.WriteLine(requestString);
-            
+            Console.WriteLine(requestString);
+
             HttpRequest request;
             try {
                 request = parseRequest(requestString);
-            } catch (Exception e) {
+            } catch (Exception err) {
+                Console.WriteLine(err.Message);
                 errMsg = "malformed request";
                 RequestHandler.writeStructuredResponse(client, HttpStatusCode.BadRequest, errMsg);
 
                 return;
             }
+            
             User? currentUser = null;
             if (request.headers.TryGetValue("Authorization", out string? token)) {
                 Guid? userId = JwtHandler.validateJwt(token);
@@ -86,7 +92,6 @@ namespace MonsterTradingCardGame {
                     RequestHandler.writeUnauthorizedErr(client);
                     return;
                 }
-                //currentUser = new User(Guid.NewGuid(), "asdf", Role.ADMIN, 20);
             } else if (request.method != "POST" || request.resource != "/login") {
                 RequestHandler.writeUnauthorizedErr(client);
                 return;
@@ -130,7 +135,7 @@ namespace MonsterTradingCardGame {
 
                 string[] headerParts = line.Split(':');
                 if (headerParts.Length == 2) {
-                    headers[headerParts[0]] = headerParts[1].Trim();
+                    headers.Add(headerParts[0], headerParts[1].Trim());
                 }
             }
 
