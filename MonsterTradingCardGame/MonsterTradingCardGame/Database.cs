@@ -28,15 +28,6 @@ namespace MonsterTradingCardGame {
             return con.State == ConnectionState.Open;
         }
 
-        public void test() {
-            string sql = "SELECT version()";
-
-            using NpgsqlCommand cmd = new NpgsqlCommand(sql, con);
-
-            string version = cmd.ExecuteScalar().ToString();
-            Console.WriteLine($"PostgreSQL version: {version}");
-        }
-
         public void setup() {
             using NpgsqlCommand cmd = new NpgsqlCommand();
             cmd.Connection = con;
@@ -248,8 +239,8 @@ namespace MonsterTradingCardGame {
             try {
                 using NpgsqlDataReader reader = cmd.ExecuteReader();
                 package = getCardListFromReader(reader);
-            } catch (Exception ex) {
-                Console.WriteLine(ex.Message);
+            } catch (Exception e) {
+                Console.WriteLine(e.Message);
                 return null;
             }
             
@@ -290,13 +281,12 @@ namespace MonsterTradingCardGame {
 
                 transaction.Commit();
             } catch (Exception e) {
-                // log exception here
                 Console.WriteLine("buyPackage failed");
                 Console.WriteLine(e.Message);
                 try {
                     transaction.Rollback();
-                } catch (Exception ex2) {
-                    // log exception here
+                } catch (Exception e2) {
+                    Console.WriteLine(e2);
                     Console.WriteLine("Rollback failed, probably connection down");
                 }
                 return null;
@@ -317,8 +307,8 @@ namespace MonsterTradingCardGame {
                 cmd.Parameters.AddWithValue("id", userId);
                 using NpgsqlDataReader reader = cmd.ExecuteReader();
                 return getIndexedCardListFromReader(reader);
-            } catch (Exception ex) {
-                Console.WriteLine(ex);
+            } catch (Exception e) {
+                Console.WriteLine(e);
                 return null;
             }
         }
@@ -335,8 +325,8 @@ namespace MonsterTradingCardGame {
                 cmd.Parameters.AddWithValue("id", userId);
                 using NpgsqlDataReader reader = cmd.ExecuteReader();
                 return getIndexedCardListFromReader(reader);
-            } catch (Exception ex) {
-                Console.WriteLine(ex);
+            } catch (Exception e) {
+                Console.WriteLine(e);
                 return null;
             }
         }
@@ -568,8 +558,8 @@ namespace MonsterTradingCardGame {
                 }
 
                 return true;
-            } catch (Exception err) {
-                Console.WriteLine(err.Message);
+            } catch (Exception e) {
+                Console.WriteLine(e.Message);
                 return false;
             }
         }
@@ -644,8 +634,8 @@ namespace MonsterTradingCardGame {
                 }
                 transaction.Commit();
                 return true;
-            } catch (Exception err) {
-                Console.WriteLine(err.Message);
+            } catch (Exception e) {
+                Console.WriteLine(e.Message);
                 transaction.Rollback();
                 return false;
             }

@@ -38,7 +38,7 @@ namespace MonsterTradingCardGame {
                 ["wins"] = wins,
                 ["defeats"] = defeats,
                 ["draws"] = draws,
-                ["statistic"] = defeats == 0 ? wins : wins / defeats,
+                ["statistic"] = defeats == 0 ? wins : Math.Round((double)wins / defeats, 2),
                 ["elo"] = elo
             };
         }

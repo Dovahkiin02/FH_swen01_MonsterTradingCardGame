@@ -65,13 +65,13 @@ namespace MonsterTradingCardGame {
             int bytesRead = client.GetStream().Read(requestData, 0, requestData.Length);
             string requestString = Encoding.UTF8.GetString(requestData, 0, bytesRead);
             string errMsg;
-            Console.WriteLine(requestString);
+            //Console.WriteLine(requestString);
 
             HttpRequest request;
             try {
                 request = parseRequest(requestString);
-            } catch (Exception err) {
-                Console.WriteLine(err.Message);
+            } catch (Exception e) {
+                Console.WriteLine(e.Message);
                 errMsg = "malformed request";
                 RequestHandler.writeStructuredResponse(client, HttpStatusCode.BadRequest, errMsg);
 
@@ -152,6 +152,7 @@ namespace MonsterTradingCardGame {
             try {
                 httpRequest.body = jbody; 
             } catch (Exception e) {
+                Console.WriteLine(e.Message);
                 throw;
             }
             

@@ -9,7 +9,6 @@ class IntegrationTest:
         self.cardListDict = dict()
         self.openCardsDict = dict()
 
-
     def login_admin(self):
         body = {
             "name": "admin",
@@ -206,6 +205,15 @@ class IntegrationTest:
         else:
             print("--> error: " + response.json()["message"])
 
+    def updateUser(self, name, newName):
+        body = {
+            "name": newName
+        }
+        response = requests.put(self.url + "/user", data=json.dumps(body), headers=self.headersDict[name])
+        if response.ok:
+            print(response.json()["message"])
+        else:
+            print("--> error: " + response.json()["message"])
 
 test = IntegrationTest()
 print("1) login admin")
@@ -307,4 +315,11 @@ print()
 
 print("23) show stack user2")
 test.getStack("user2")
+
+print("24) update user1")
+test.updateUser("user1", "amazingTestName")
+print()
+
+print("25) show user1")
+test.getUser("user1")
 print()

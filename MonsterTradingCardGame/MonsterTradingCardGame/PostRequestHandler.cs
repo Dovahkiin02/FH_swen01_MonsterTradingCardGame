@@ -92,7 +92,7 @@ namespace MonsterTradingCardGame {
                 bool result = db.addCard(
                     body["name"].ToString(), 
                     Enum.Parse<Element>(body["element"].ToString()), 
-                    int.Parse(body["element"].ToString()),
+                    int.Parse(body["damage"].ToString()),
                     Enum.Parse<Type>(body["type"].ToString())
                     );
                 if (!result) {
@@ -133,7 +133,15 @@ namespace MonsterTradingCardGame {
                 writeMalformedBodyErr(client);
                 return;
             }
-            List<int> cards = body["cards"].Select(e => int.Parse((string)e)).ToList();
+            List<int> cards = new();
+            try {
+                cards = body["cards"].Select(e => int.Parse((string)e)).ToList();
+            } catch (Exception e) {
+                Console.WriteLine(e.Message);
+                writeMalformedBodyErr(client);
+                return;
+            }
+            
             string responseMsg;
             if (cards.Count != deckSize) {
                 responseMsg = $"wrong number of cards provided.\nA deck may only contain {deckSize} number of cards";

@@ -7,6 +7,11 @@ After designing and building the database, I built the methods in c# that will a
 Next I built a basic Server that can listen to and parse requests.
 After that all that was missing were routes that the client could send requests to, which then implement the real functionality of the server and therefor connect the server with the interface Class to the Database.
 Additionally I implemented a few helper Classes which help with readabilty and maintainability of the code.
+
+### Battle Design
+I designed the battle on the principle of client polling. That means, when a user wants to start a battle, he sends a request to the server and then get listed into a queue and gets as response that he is waiting for other users. Then if a second user wants to battle, the battle starts and the second user gets the result of the battle as a response.
+When the first user wants to know the result, he has to send a second request.
+
 ## Solutions
 ### Routes
 I opted to outsource the routes into different classes and then use delegates to call them via a dictionary. Here is how that looks in code:
