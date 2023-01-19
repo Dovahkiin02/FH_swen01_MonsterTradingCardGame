@@ -74,5 +74,18 @@ mockedDB.Setup(x => x.getDeck(It.IsAny<Guid>())).Returns((Guid id) => {
 });
 ```
 
+## Lessons learned
+This was the first time for me to at all work with c# so there were many lessons I learned while working on this project.
+But probably one of the biggest lessons I learned only after I was almost done with the project, was how much automated testing could have helped. I know that, that is something especially new programmers often get to hear but it really is something else to experience it first hand. It just happens way too often that some small change or refactoring in one place of the program breaks something else and it then takes forever to find out. So for the next bigger project I'll definitly write automated tests a lot earlier than I did this time.
+
+## Unit testing decisions
+I picked out the most crucial and also testable componands. So for example I don't have any unit tests for the Database class and the server class, because that would have been too much work with all those dependencies. Unfortunatly that only really left the gameHandler class to be a viable candidate for unit tests.
+
+## Unique Feature
+My unique feature in this project, apart from totally changing the api and then having to write my own end-to-end test for it (which was a lot more work than I would have expected), was a relatively small python client for the server-application.
+
+## Tracked Time
+I didn't track my time. But it was a lot.
+
 ## Git
 https://github.com/Dovahkiin02/FH_swen01_MonsterTradingCardGame

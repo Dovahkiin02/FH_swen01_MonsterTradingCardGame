@@ -16,7 +16,8 @@ namespace MonsterTradingCardGame {
     
         private static readonly Dictionary<int, string> reasonPhrases = new Dictionary<int, string> {
             [200] = "OK",
-            [201] = "Created", 
+            [201] = "Created",
+            [204] = "No Content",
             [400] = "Bad Request",
             [401] = "Unauthorized",
             [403] = "Forbidden",

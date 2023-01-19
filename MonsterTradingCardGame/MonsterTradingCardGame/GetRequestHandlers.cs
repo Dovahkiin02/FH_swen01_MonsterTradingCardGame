@@ -36,7 +36,7 @@ namespace MonsterTradingCardGame {
                 return;
             } else if (deck.Count == 0) {
                 responseMsg = "no deck defined";
-                writeStructuredResponse(client, HttpStatusCode.NoContent, responseMsg);
+                writeStructuredResponse(client, HttpStatusCode.NotFound, responseMsg);
                 return;
             }
             JArray responseBody = new();
@@ -57,7 +57,7 @@ namespace MonsterTradingCardGame {
             
             if (offers == null || offers.Count == 0) {
                 string msg = "no offers found in store";
-                writeStructuredResponse(client, HttpStatusCode.NoContent, msg);
+                writeStructuredResponse(client, HttpStatusCode.NotFound, msg);
                 return;
             }
 

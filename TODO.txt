@@ -5,7 +5,8 @@
 - [DONE] update user (password isn't encrypted so far)
 - [DONE] Store
 - [DONE] Scoreboard
+- [DONE] python end-to-end tests
 
 - client (mandatory unique feature)
-- curl script
-- Protocol
+
+- ReadMe

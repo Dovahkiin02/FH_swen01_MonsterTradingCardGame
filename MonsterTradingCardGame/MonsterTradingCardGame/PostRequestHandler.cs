@@ -180,7 +180,7 @@ namespace MonsterTradingCardGame {
                 writeResponse(client, HttpStatusCode.InternalServerError, responseMsg);
                 return;
             } else if (status == Status.FINISHED) {
-                Tuple<FightResult, string>? protocol = gameHandler.getProtocol(user.id);
+                Tuple<FightResult, string, string, string>? protocol = gameHandler.getProtocol(user.id);
                 if (protocol == null) {
                     responseMsg = "unexpected error while finishing game";
                     writeStructuredResponse(client, HttpStatusCode.InternalServerError, responseMsg);
@@ -188,14 +188,16 @@ namespace MonsterTradingCardGame {
                 }
                 response["state"] = Enum.GetName(typeof(Status), status);
                 response["result"] = Enum.GetName(typeof(FightResult), protocol.Item1);
-                response["protocol"] = protocol.Item2;
+                response["player1"] = protocol.Item2;
+                response["player2"] = protocol.Item3;
+                response["protocol"] = protocol.Item4;
                 writeResponse(client, HttpStatusCode.OK, response);
                 return;
             } else { 
                 Thread.Sleep(300);
                 status = gameHandler.getStatus(user.id);
                 if (status == Status.FINISHED) {
-                    Tuple<FightResult, string>? protocol = gameHandler.getProtocol(user.id);
+                    Tuple<FightResult, string, string, string>? protocol = gameHandler.getProtocol(user.id);
                     if (protocol == null) {
                         responseMsg = "unexpected error while finishing game";
                         writeStructuredResponse(client, HttpStatusCode.InternalServerError, responseMsg);
@@ -203,7 +205,9 @@ namespace MonsterTradingCardGame {
                     }
                     response["state"] = Enum.GetName(typeof(Status), status);
                     response["result"] = Enum.GetName(typeof(FightResult), protocol.Item1);
-                    response["protocol"] = protocol.Item2;
+                    response["player1"] = protocol.Item2;
+                    response["player2"] = protocol.Item3;
+                    response["protocol"] = protocol.Item4;
                     writeResponse(client, HttpStatusCode.OK, response);
                     return;
                 } else if (status == Status.FAILED) {
@@ -230,6 +234,11 @@ namespace MonsterTradingCardGame {
             string responseMsg;
             if (!db.checkCardAvailability(user.id, stackId)) {
                 responseMsg = "card isn't available in stack of user";
+                writeStructuredResponse(client, HttpStatusCode.BadRequest, responseMsg);
+                return;
+            }
+            if (db.checkDuplicateOfferInStore(stackId)) {
+                responseMsg = "offer is already in store";
                 writeStructuredResponse(client, HttpStatusCode.BadRequest, responseMsg);
                 return;
             }

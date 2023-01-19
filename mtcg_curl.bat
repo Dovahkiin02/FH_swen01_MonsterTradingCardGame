@@ -72,3 +72,11 @@ echo.
 curl -X GET http://localhost:9999/deck --header "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIyNmRhZGU1YS0wZmU3LTQ5MDgtYmM3OS01ZjkzNmNjYTY0NmYiLCJleHAiOjE3MzcxNDUyMjYsInVzZXJJZCI6IjkxMDM1NDliLTE5OTEtNGIyNi1iYTJhLWExNWQ4ZjZiODZjMyJ9.DNIQ9tNxBlh0LdFJkuk1xCQ_I_9PziVERVP4Gekk-w8"
 echo.
 echo.
+
+curl -X GET http://localhost:9999/deck  --header "Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIyNmRhZGU1YS0wZmU3LTQ5MDgtYmM3OS01ZjkzNmNjYTY0NmYiLCJleHAiOjE3MzcyODEzNzUsInVzZXJJZCI6IjBlYzY3YjI5LWZmYmMtNDNiNy05NzcxLWY0ZDBjYzJjOWUzZCJ9.iRqdVXqYBvDptJ5tGpwFB6JoXjb1ngwA9fSPi8b3MRs"
+
+select count(*)
+  from stack
+ where player = '0ec67b29-ffbc-43b7-9771-f4d0cc2c9e3d'
+   and id = any(array[21, 22, 23, 25])
+   and id not in (select stackid from store);

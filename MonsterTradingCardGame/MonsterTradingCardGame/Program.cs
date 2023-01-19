@@ -3,7 +3,7 @@
 Database db = new();
 db.connect();
 
-//db.setup();
+db.setup();
 Server s = new(9999, db);
 s.Start();
 

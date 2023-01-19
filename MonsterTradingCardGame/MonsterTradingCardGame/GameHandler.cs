@@ -18,7 +18,7 @@ namespace MonsterTradingCardGame {
     internal class GameHandler {
         private Database db;
         internal ConcurrentDictionary<Guid, Status> ledger = new();
-        private ConcurrentDictionary<Guid, Tuple<FightResult, string>> protocols = new();
+        private ConcurrentDictionary<Guid, Tuple<FightResult, string, string, string>> protocols = new();
 
         private Dictionary<Element, ValueTuple<float, float, float, float>> elementInteractions = new();
         private Dictionary<Type, Dictionary<Type, float>> typeInteractions = new();
@@ -47,8 +47,8 @@ namespace MonsterTradingCardGame {
             return null;
         }
 
-        public Tuple<FightResult, string>? getProtocol(Guid userId) {
-            if (protocols.TryRemove(userId, out Tuple<FightResult, string>? protocol)) {
+        public Tuple<FightResult, string, string, string>? getProtocol(Guid userId) {
+            if (protocols.TryRemove(userId, out Tuple<FightResult, string, string, string>? protocol)) {
                 return protocol;
             }
             return null;
@@ -130,8 +130,8 @@ namespace MonsterTradingCardGame {
             db.updateStats(user1, user2, fightResult);
 
             gameFinished(user1, user2);
-            protocols.AddOrUpdate(user1, Tuple.Create(fightResult, protocol.ToString()), (key, value) => Tuple.Create(fightResult, protocol.ToString()));
-            protocols.AddOrUpdate(user2, Tuple.Create(fightResult, protocol.ToString()), (key, value) => Tuple.Create(fightResult, protocol.ToString()));
+            protocols.AddOrUpdate(user1, Tuple.Create(fightResult, username1, username2, protocol.ToString()), (key, value) => Tuple.Create(fightResult, username1, username2, protocol.ToString()));
+            protocols.AddOrUpdate(user2, Tuple.Create(fightResult, username1, username2, protocol.ToString()), (key, value) => Tuple.Create(fightResult, username1, username2, protocol.ToString()));
         }
 
         internal FightRecord fight(Card card1, Card card2) {

@@ -85,13 +85,14 @@ namespace MonsterTradingCardGame {
                 insert into player
                     (id     ,  name,        password                ,  coins ,  role, wins, defeats, draws, elo)
                 values
-                    (default, @name, crypt(@password, gen_salt('bf')), @coins, @role,  0  ,   0    , 0    , 0  )
+                    (default, @name, crypt(@password, gen_salt('bf')), @coins, @role,  0  ,   0    , 0    , @elo  )
                 ;";
             using NpgsqlCommand cmd = new(sql, con);
-            cmd.Parameters.AddWithValue("@name", name);
-            cmd.Parameters.AddWithValue("@password", password);
-            cmd.Parameters.AddWithValue("@coins", coins);
-            cmd.Parameters.AddWithValue("@role", (int)role);
+            cmd.Parameters.AddWithValue("name", name);
+            cmd.Parameters.AddWithValue("password", password);
+            cmd.Parameters.AddWithValue("coins", coins);
+            cmd.Parameters.AddWithValue("role", (int)role);
+            cmd.Parameters.AddWithValue("elo", elo);
 
             try {
                 return cmd.ExecuteNonQuery() > 0;
@@ -349,7 +350,7 @@ namespace MonsterTradingCardGame {
                   from stack
                  where player = @id
                    and id = any(@cards)
-                   and id not in (select id
+                   and id not in (select stackid
                                     from store
                                  )
                 ;";
@@ -485,7 +486,7 @@ namespace MonsterTradingCardGame {
 
         public List<ValueTuple<int, User>>? getScoreboard() {
             string sql = @"
-                select row_number() over (order by elo), id, name, role, coins, wins, defeats, draws, elo
+                select row_number() over (order by elo desc), id, name, role, coins, wins, defeats, draws, elo
                   from player
                  where name != 'admin'
                 ;";
@@ -571,6 +572,18 @@ namespace MonsterTradingCardGame {
                 Console.WriteLine(err.Message);
                 return false;
             }
+        }
+
+        public bool checkDuplicateOfferInStore(int stackId) {
+            string sql = @"
+                select stackid
+                  from store
+                 where stackid = @stackId
+                ;";
+            using NpgsqlCommand cmd = new(sql, con);
+            cmd.Parameters.AddWithValue("stackId", stackId);
+
+            return cmd.ExecuteScalar() != null;
         }
 
         public bool buyCardFromStore(Guid userId, int stackId) {
