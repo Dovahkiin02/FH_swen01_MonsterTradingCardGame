@@ -12,6 +12,11 @@ Additionally I implemented a few helper Classes which help with readabilty and m
 I designed the battle on the principle of client polling. That means, when a user wants to start a battle, he sends a request to the server and then get listed into a queue and gets as response that he is waiting for other users. Then if a second user wants to battle, the battle starts and the second user gets the result of the battle as a response.
 When the first user wants to know the result, he has to send a second request.
 
+## Trading Desin
+I implemented trading only in the form of card for coin. Trading cards in the way it was described in the MonsterTradingCards_exercise.pdf just didn't make sense to me. So I chose to implement it as a feature that is very common in these types of games.
+
+I know that in a real world scenario that wouldn't be an option, as I can't just change requirement from the client just because I don't like them. So, I of course would never do that in real live. But since this is an exercise with the goal of getting us more familiar with many important principals of programming, I don't see how this change of mine stands in the way of the original goal of the whole project.
+
 ## Solutions
 ### Routes
 I opted to outsource the routes into different classes and then use delegates to call them via a dictionary. Here is how that looks in code:
